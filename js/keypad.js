@@ -1,7 +1,9 @@
 // The shop keypad: big keys, a fraction row drawn like a tape blade, and marks for feet, inches and mm.
 // The calculator has it on screen all the time; on a touch screen it also slides up for any length box in the tools.
 import { applyKey } from './keys.js';
-import { $, ICON, touch } from './ui.js';
+import { $, ICON, touch, fmt, esc } from './ui.js';
+import { store, unpack } from './store.js';
+import { exactText } from './format.js';
 
 // [key, label, aria-label, class, span]
 const ROWS = [
@@ -55,7 +57,8 @@ export function initDock() {
   dock.innerHTML = `
     <div class="dock-head">
       <span class="dock-label" id="dockLabel"></span>
-      <button type="button" class="dock-btn" id="dockKb">Keyboard</button>
+      <button type="button" class="dock-btn tape" id="dockTape" hidden></button>
+      <button type="button" class="dock-btn kb" id="dockKb" aria-label="Use the phone’s keyboard"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M6 13.5h1M17 13.5h1M9 14h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       <button type="button" class="dock-btn done" id="dockDone">Done</button>
     </div>
     <div class="keys">${keypadHTML({ equals: 'Next', equalsLabel: 'Next box' })}</div>`;
@@ -70,6 +73,12 @@ export function initDock() {
     },
   });
   $('#dockDone', dock).addEventListener('click', () => dockInput?.blur());
+  // The last length worked out on the calculator's tape, ready to drop in.
+  $('#dockTape', dock).addEventListener('click', e => {
+    if (!dockInput) return;
+    dockInput.value = e.currentTarget.dataset.text;
+    dockInput.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   $('#dockKb', dock).addEventListener('click', () => {
     // Switch this box to the phone's own keyboard.
     const input = dockInput;
@@ -86,6 +95,14 @@ export function initDock() {
     dockInput = input;
     const label = input.closest('.field')?.querySelector('.label')?.textContent || '';
     $('#dockLabel', dock).textContent = label;
+    const last = [...store.tape.lines].reverse().map(l => unpack(l.v)).find(v => v.dim === 1);
+    const tape = $('#dockTape', dock);
+    tape.hidden = !last;
+    if (last) {
+      tape.dataset.text = exactText(last);
+      tape.innerHTML = `<small>Tape</small> ${esc(fmt.len(last.q))}`;
+      tape.setAttribute('aria-label', `Use ${fmt.len(last.q)} from the tape`);
+    }
     dock.hidden = false;
     document.body.classList.add('docked');
     requestAnimationFrame(() => {

@@ -629,6 +629,9 @@ body[data-screen="calc"] .toast { bottom: auto; top: calc(var(--bar-h) + 34px + 
 .dock-label { flex: 1; min-width: 0; font: 700 17px/1.1 var(--disp); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dock-btn { min-height: 36px; padding: 4px 14px; border-radius: 999px; border: 1.5px solid var(--steel-4); background: var(--steel-1); font: 700 16px/1 var(--disp); }
 .dock-btn.done { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dock-btn.kb { width: 44px; padding: 0; display: grid; place-items: center; }
+.dock-btn.tape { background: var(--paper); color: var(--paper-ink); white-space: nowrap; flex: none; max-width: 48%; overflow: hidden; text-overflow: ellipsis; }
+.dock-btn.tape small { font: 700 11px var(--sans); text-transform: uppercase; letter-spacing: .07em; color: var(--paper-dim); margin-right: 3px; }
 .dock .k.eq { font-size: 20px; text-transform: uppercase; letter-spacing: .06em; }
 body.docked main { padding-bottom: 460px; }
 

@@ -25,7 +25,7 @@
 - **Board feet.** Thickness in quarters (4/4, 8/4) or any size, width, length and count, with cost from a price per board foot, and a running list for the lumber yard that adds up and copies as text.
 - **Triangles and square.** Any two of rise, run and diagonal give the third, the angle, the roof pitch in 12 and the rafter length per foot of run. For squaring up a frame: the diagonal it should have, what two measured diagonals say and which corners to push, and the biggest 3-4-5 that fits.
 - **Convert.** A size typed any way, shown every other way, with the nearest fraction at each size from halves to 64ths and how far off each is, and a chart of fractions, decimals and millimetres.
-- **Every box is a calculator.** Length boxes in the tools take sums too (`8' - 2 × 3/4"`), and say how they read them. On a phone the shop keypad slides up for them instead of the phone's keyboard.
+- **Every box is a calculator.** Length boxes in the tools take sums too (`8' - 2 × 3/4"`), and say how they read them. On a phone the shop keypad slides up for them instead of the phone's keyboard, with the last length from the tape ready to drop in.
 - No account and no server. Tapes, the lumber list and what you last typed in each tool stay in your browser. It works offline and installs to a phone's home screen. Light and dark follow your phone.
 
 ## Running it

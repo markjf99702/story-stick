@@ -158,6 +158,13 @@ async function padType(id, list) {
 }
 
 await tool('Even spacing');
+// The keypad offers the last length from the calculator's tape.
+await page.tap('#sp-space');
+assert.equal(await text(page, '#dockTape'), 'TAPE 1′ 3/16″');
+await page.click('#dockTape');
+assert.equal(await page.inputValue('#sp-space'), '309.8mm', 'exactly, as millimetres');
+assert.equal(await text(page, '#sp-space-reads'), '= 1′ 3⁄16″');
+await page.click('#dockDone');
 await page.click('[data-p=balusters]');
 await padType('sp-space', ['6', 'ft']);
 assert.equal(await page.inputValue('#sp-space'), '6′');
