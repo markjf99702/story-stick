@@ -120,7 +120,10 @@ export function toast(text) {
 // The sheet that slides up for settings, tapes and help.
 export function openSheet(html, onClose) {
   const sheet = document.getElementById('sheet');
-  const body = sheet.querySelector('.sheet-body');
+  // A fresh body each time, so listeners from the last sheet don't pile up.
+  const body = document.createElement('div');
+  body.className = 'sheet-body';
+  sheet.querySelector('.sheet-body').replaceWith(body);
   body.innerHTML = html;
   const title = body.querySelector('h2');
   if (title) { title.id = 'sheetTitle'; sheet.setAttribute('aria-labelledby', 'sheetTitle'); }

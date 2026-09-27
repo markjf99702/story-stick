@@ -248,9 +248,10 @@ export function evaluate(text, { bare = 'in' } = {}) {
   return v;
 }
 
-// While typing: the sum so far, leaving off a sign at the end (3' 7" + shows 3' 7").
+// While typing: the sum so far, leaving off a sign at the end (3' 7" + shows 3' 7"),
+// and a tape reading that's half typed (7-5 on the way to 7-5/16 shows 7, not 7 − 5).
 export function preview(text, opts) {
-  let trimmed = String(text ?? '').replace(/[\s+\-−–×x*÷/(:]+$/i, '');
+  let trimmed = String(text ?? '').replace(/[\s+\-−–×x*÷/(:]+$/i, '').replace(/(\d)-\d+$/, '$1');
   if (!trimmed.trim()) return null;
   const open = (trimmed.match(/[([]/g) || []).length - (trimmed.match(/[)\]]/g) || []).length;
   if (open > 0) trimmed += ')'.repeat(open);

@@ -130,7 +130,7 @@ function live() {
   if (!text.trim()) { show(null); return; }
   const v = preview(text, { bare: fmt.bare });
   if (v) show(v, true);
-  else { els.read.classList.add('live'); els.read.classList.remove('err'); }
+  else els.read.classList.add('live'); // keep the last reading (or what was wrong), dimmed
 }
 
 function showError(message) {
@@ -183,6 +183,13 @@ export function readout(v) {
   return { main: esc(F.volumeText(q)), also, long: true };
 }
 
+// The answer as plain text, whatever kind it is.
+export function answerText(v) {
+  if (v.dim === 1) return fmt.len(v.q);
+  if (v.dim === 0) return F.numText(v.q);
+  return v.dim === 2 ? F.areaText(v.q) : `${F.volumeText(v.q)}, ${F.boardFeetText(v.q)}`;
+}
+
 // A short answer for the tape, with a small + or − when rounding left a hair.
 export function tapeText(v) {
   if (v.dim === 1) {
@@ -217,7 +224,7 @@ function drawTape() {
   } else {
     els.lines.innerHTML = t.lines.map((l, i) => {
       const v = unpack(l.v);
-      return `<li><button type="button" class="line" data-line="${i}" aria-label="Use ${esc(fmt.len(v.q))}">
+      return `<li><button type="button" class="line" data-line="${i}" aria-label="Use ${esc(answerText(v))}">
           <span class="e">${pretty(l.e)}</span><span class="r"><span class="eq">=</span> ${tapeText(v)}</span></button></li>`;
     }).join('');
   }
@@ -239,7 +246,7 @@ function useLine(i) {
   done = null;
   input.classList.remove('done');
   live();
-  toast(`Using ${v.dim === 1 ? fmt.len(v.q) : F.numText(v.q)}`);
+  toast(`Using ${answerText(v)}`);
   if (!touch) input.focus();
 }
 
@@ -284,7 +291,7 @@ function tapesSheet() {
 export function tapeAsText(t) {
   const lines = t.lines.map(l => {
     const v = unpack(l.v);
-    const r = v.dim === 1 ? fmt.len(v.q) : v.dim === 0 ? F.numText(v.q) : v.dim === 2 ? F.areaText(v.q) : F.volumeText(v.q);
+    const r = answerText(v);
     return `${l.e.replace(/'/g, '′').replace(/"/g, '″')}\n  = ${r}`;
   });
   return `${tapeTitle(t)}\n\n${lines.join('\n')}\n`;

@@ -223,6 +223,8 @@ test('while typing, the preview leaves off a sign at the end and closes brackets
   same(preview(`3' 7" + `).q, inch(43));
   same(preview(`(3' + 2"`).q, inch(38));
   same(preview(`5/`).q, Q(5));
+  same(preview(`7-5`).q, Q(7), 'a half-typed 7-5/16 is not 7 − 5');
+  same(preview(`7 - 5`).q, Q(2), 'with spaces it is');
   assert.equal(preview(''), null);
   assert.equal(preview('2 3'), null);
 });
