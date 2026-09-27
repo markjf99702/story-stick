@@ -208,6 +208,14 @@ small { font-size: .8em; }
 
 main { max-width: 1120px; margin: 0 auto; padding: 18px 16px 120px; outline: none; }
 
+/* Part of junkdrawer.works: under the tool screens and in Settings. The calculator keeps the whole screen for its keys. */
+.jd-foot { padding: 0 16px calc(20px + env(safe-area-inset-bottom)); text-align: center; font-size: 14px; color: var(--muted); }
+.jd-foot a { text-decoration: none; }
+.jd-foot a:hover, .jd-foot a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.jd-foot span { margin: 0 6px; }
+body[data-screen="calc"] > .jd-foot { display: none; }
+.about .jd-foot { padding: 0; margin-top: 10px; }
+
 /* ---------- Calculator ---------- */
 body[data-screen="calc"] main { padding: 0; max-width: none; }
 .calc {

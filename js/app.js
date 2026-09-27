@@ -77,7 +77,11 @@ function settingsSheet() {
     <div class="about">
       <p>Tapes, the lumber list and what you last typed in each tool are kept in this browser, on this device. Nothing is sent anywhere. It works offline, and you can add it to your home screen.</p>
       <button type="button" class="btn quiet" id="forget">Clear everything</button>
-      <p class="small">Story Stick is part of <a href="https://junkdrawer.works/">junkdrawer.works</a>.</p>
+      <footer class="jd-foot">
+        <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+      </footer>
     </div>`);
   onSeg(body, 'den', v => { store.setting('den', Number(v)); rerender(body); });
   onSeg(body, 'show', v => { store.setting('show', v); rerender(body); });
