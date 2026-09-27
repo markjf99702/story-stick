@@ -26,6 +26,8 @@ export const fmt = {
   },
   hair: x => (fmt.show === 'mm' ? '' : F.hairText(x, fmt.den)),
   money: x => F.money(x, store.settings.money || '$'),
+  // Whole feet without the 0″: 10′.
+  even: x => fmt.len(x).replace(/′ 0″$/, '′'),
   // A reading inside a sentence.
   rd: (x, show) => `<span class="rd">${esc(F.lenText(x, { den: fmt.den, show: show || fmt.show }))}</span>`,
 };
@@ -37,7 +39,7 @@ export function lenField(id, label, value = '', { placeholder = '', hint = '', b
   return `<label class="field" for="${id}">
       <span class="label">${label}</span>
       <input id="${id}" class="len" type="text" value="${esc(value)}" placeholder="${esc(placeholder)}"
-        autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="next"${touch ? ' inputmode="none"' : ''}${bare ? ` data-bare="${bare}"` : ''}>
+        autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="next"${touch ? ' inputmode="none"' : ''}${bare ? ` data-bare="${bare}"` : ''}${hint ? ` data-hint="${esc(hint)}"` : ''}>
       <span class="reads" id="${id}-reads" aria-live="polite">${hint ? esc(hint) : ''}</span>
     </label>`;
 }
@@ -45,7 +47,7 @@ export function numField(id, label, value = '', { placeholder = '', hint = '', s
   return `<label class="field" for="${id}">
       <span class="label">${label}</span>
       <input id="${id}" class="num" type="text" inputmode="decimal" value="${esc(value)}" placeholder="${esc(placeholder)}"
-        autocomplete="off" spellcheck="false"${step ? ` data-step="${step}"` : ''}>
+        autocomplete="off" spellcheck="false"${step ? ` data-step="${step}"` : ''}${hint ? ` data-hint="${esc(hint)}"` : ''}>
       <span class="reads" id="${id}-reads">${hint ? esc(hint) : ''}</span>
     </label>`;
 }

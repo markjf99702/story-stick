@@ -9,6 +9,8 @@ import * as F from '../format.js';
 const QUARTERS = ['4/4', '5/4', '6/4', '8/4', '10/4', '12/4', '16/4'];
 const bf = q => F.dec(q, 2);
 // A price may come with its money sign: $8.50 or 8.50.
+// A line's sizes, read the same way every time: 8/4 × 7″ × 10′, with the count in front if there's more than one.
+const sizes = x => `${x.n > 1 ? `${x.n} pieces, ` : ''}${/^\s*\d+\s*\/\s*4\s*$/.test(x.thick) ? x.thick.replace(/\s/g, '') : fmt.even(x.t)} × ${fmt.even(x.w)} × ${fmt.even(x.l)}`;
 const priceOf = text => tryNumber(String(text).replace(/[^\d.,]/g, '')).q;
 
 // A line on the list is kept as the text typed, so it reads the same way back.
@@ -21,7 +23,7 @@ function lineOf(item) {
     const n = Number(item.count) || 1;
     const feet = boardFeet({ thick: t, width: w, length: l, count: n });
     const price = item.price ? fromText(item.price) : null;
-    return { ...item, n, feet, cost: price ? mul(feet, price) : null };
+    return { ...item, t, w, l, n, feet, cost: price ? mul(feet, price) : null };
   } catch { return null; }
 }
 
@@ -100,7 +102,7 @@ export default {
       $('#bf-list').innerHTML = `
         <ul class="lumber">${lines.map(x => `
           <li>
-            <div class="what"><b>${esc(x.what || 'Boards')}</b><span>${x.n} × ${esc(x.thick)} × ${esc(x.width)} × ${esc(x.length)}</span></div>
+            <div class="what"><b>${esc(x.what || 'Boards')}</b><span>${esc(sizes(x))}</span></div>
             <div class="nums"><span>${bf(x.feet)} bd ft</span>${x.cost ? `<small>${fmt.money(x.cost)}</small>` : ''}</div>
             <button type="button" class="x" data-del="${x.id}" aria-label="Take ${esc(x.what || 'these boards')} off the list">${ICON.x}</button>
           </li>`).join('')}
@@ -118,7 +120,7 @@ export default {
       let feet = Q(0), cost = Q(0);
       const rows = lines.map(x => {
         feet = add(feet, x.feet); if (x.cost) cost = add(cost, x.cost);
-        return `${x.what || 'Boards'}: ${x.n} × ${x.thick} × ${x.width} × ${x.length} = ${bf(x.feet)} bd ft${x.cost ? `, ${fmt.money(x.cost)}` : ''}`;
+        return `${x.what || 'Boards'}: ${sizes(x)} = ${bf(x.feet)} bd ft${x.cost ? `, ${fmt.money(x.cost)}` : ''}`;
       });
       return `Lumber list\n\n${rows.join('\n')}\n\nTotal: ${bf(feet)} bd ft${lines.some(x => x.cost) ? `, ${fmt.money(cost)}` : ''}\n`;
     };
