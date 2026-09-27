@@ -78,8 +78,8 @@ export default {
       gv.innerHTML = fmt.html(r.gap);
       gh.textContent = [fmt.hair(r.gap), fmt.show === 'mm' ? '' : F.decInText(r.gap)].filter(Boolean).join(' · ');
       const bits = [`${r.n} with ${r.gaps} ${r.gaps === 1 ? 'gap' : 'gaps'}.`];
-      if (s.count != null && r.fewest != null && s.count !== r.fewest) bits.push(`The fewest that keeps gaps at ${fmt.len(gap)} or less is ${r.fewest}. <button type="button" class="link-btn" id="sp-fewest">Use ${r.fewest}</button>`);
-      if (r.over) bits.push(`<b>The gaps are bigger than ${esc(fmt.len(gap))}.</b>`);
+      if (s.count != null && r.fewest != null && s.count !== r.fewest) bits.push(`The fewest that keeps gaps at ${fmt.rd(gap)} or less is ${r.fewest}. <button type="button" class="link-btn" id="sp-fewest">Use ${r.fewest}</button>`);
+      if (r.over) bits.push(`<b>The gaps are bigger than ${fmt.rd(gap)}.</b>`);
       note.innerHTML = bits.join(' ');
       note.className = 'note' + (r.over ? ' bad' : '');
       $('#sp-draw').innerHTML = spacingSVG({ space, width, marks: r.marks, ends: s.ends });

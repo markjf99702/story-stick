@@ -26,7 +26,7 @@ export function renderCalc(main) {
           <button type="button" class="roll-name" id="tapesBtn" aria-haspopup="dialog">
             <span id="tapeName"></span><span class="count" id="tapeCount"></span>
           </button>
-          <button type="button" class="chip" id="helpBtn">${ICON.help}<span>How to type</span></button>
+          <button type="button" class="chip" id="helpBtn" aria-label="How to type">${ICON.help}<span>How to type</span></button>
           <button type="button" class="chip" id="newTape">New tape</button>
         </div>
         <div class="roll" id="roll"><ol id="lines" aria-label="Paper tape"></ol></div>
@@ -77,7 +77,7 @@ export function renderCalc(main) {
     if (e.inputType === 'deleteContentBackward') { done = null; input.classList.remove('done'); return; }
     if (!e.inputType.startsWith('insert')) return;
     e.preventDefault();
-    const data = e.data ?? '';
+    const data = e.data ?? e.dataTransfer?.getData('text/plain') ?? '';
     const op = /^[+\-−*x×/÷]$/.test(data) ? data.replace('*', '×').replace('x', '×').replace('-', '−').replace('/', '÷') : null;
     input.value = op ? `${F.exactText(done)} ${op} ` : data;
     done = null;
@@ -201,7 +201,8 @@ export function tapeText(v) {
 
 const pretty = e => esc(e).replace(/'/g, '′').replace(/"/g, '″').replace(/\*/g, '×');
 const when = t => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-export const tapeTitle = t => t.name || `Tape from ${when(t.at)}`;
+const clock = t => new Date(t).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+export const tapeTitle = (t, withTime = false) => t.name || `Tape from ${when(t.at)}${withTime ? `, ${clock(t.at)}` : ''}`;
 
 function drawTape() {
   const t = store.tape;
@@ -247,8 +248,8 @@ function tapesSheet() {
   const row = (t, i) => {
     const last = t.lines.at(-1);
     return `<li class="tape-row${i === 0 ? ' current' : ''}" data-id="${t.id}">
-        <input class="tape-title" value="${esc(t.name)}" placeholder="${esc(tapeTitle({ ...t, name: '' }))}" aria-label="Name this tape" maxlength="60">
-        <p class="meta">${i === 0 ? 'On the calculator now · ' : ''}${t.lines.length} ${t.lines.length === 1 ? 'sum' : 'sums'}${last ? ` · last: ${tapeText(unpack(last.v))}` : ''}</p>
+        <input class="tape-title" value="${esc(t.name)}" placeholder="${esc(tapeTitle({ ...t, name: '' }, true))}" aria-label="Name this tape" maxlength="60">
+        <p class="meta">${i === 0 ? 'On the calculator now · ' : ''}${t.lines.length} ${t.lines.length === 1 ? 'sum' : 'sums'}${last ? ` · last: <span class="rd">${tapeText(unpack(last.v))}</span>` : ''}</p>
         <div class="row-btns">
           ${i ? '<button type="button" class="btn small" data-act="open">Open</button>' : ''}
           <button type="button" class="btn small" data-act="copy">Copy</button>
@@ -274,7 +275,7 @@ function tapesSheet() {
     if (b.dataset.act === 'open') { store.openTape(id); done = null; input.value = ''; show(null); drawTape(); closeSheet(); }
     if (b.dataset.act === 'copy') copyText(tapeAsText(t), $('.copy-fallback', body));
     if (b.dataset.act === 'delete') {
-      if (!confirm(`${id === store.tape.id ? 'Clear' : 'Delete'} “${tapeTitle(t)}”?`)) return;
+      if (!confirm(`${id === store.tape.id ? 'Clear' : 'Delete'} “${tapeTitle(t, true)}”?`)) return;
       store.deleteTape(id); done = null; input.value = ''; show(null); drawTape(); closeSheet();
     }
   });

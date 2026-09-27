@@ -26,6 +26,8 @@ export const fmt = {
   },
   hair: x => (fmt.show === 'mm' ? '' : F.hairText(x, fmt.den)),
   money: x => F.money(x, store.settings.money || '$'),
+  // A reading inside a sentence.
+  rd: (x, show) => `<span class="rd">${esc(F.lenText(x, { den: fmt.den, show: show || fmt.show }))}</span>`,
 };
 
 export const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
@@ -120,6 +122,8 @@ export function openSheet(html, onClose) {
   const sheet = document.getElementById('sheet');
   const body = sheet.querySelector('.sheet-body');
   body.innerHTML = html;
+  const title = body.querySelector('h2');
+  if (title) { title.id = 'sheetTitle'; sheet.setAttribute('aria-labelledby', 'sheetTitle'); }
   sheet.onclose = () => { body.innerHTML = ''; onClose?.(); };
   if (!sheet.open) sheet.showModal();
   return body;

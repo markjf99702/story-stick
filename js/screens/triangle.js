@@ -51,7 +51,7 @@ export default {
       </div>`;
 
     // Whole feet read better without the 0″ in a sentence: 6′, not 6′ 0″.
-    const even = q => fmt.len(q).replace(/′ 0″$/, '′');
+    const even = q => fmt.rd(q).replace(/′ 0″</, '′<');
     const stat = (k, v, h = '') => `<div class="stat readout"><span class="lbl">${k}</span><span class="v">${v}</span>${h ? `<span class="h">${h}</span>` : ''}</div>`;
     const update = () => {
       for (const [k, id] of [['rise', 'tr-rise'], ['run', 'tr-run'], ['diag', 'tr-diag'], ['w', 'sq-w'], ['l', 'sq-l'], ['d1', 'sq-d1'], ['d2', 'sq-d2']]) s[k] = $('#' + id).value;
@@ -78,17 +78,17 @@ export default {
 
       const w = readLen('sq-w'), l = readLen('sq-l'), d1 = readLen('sq-d1'), d2 = readLen('sq-d2');
       const sq = w && l ? squareCheck({ width: w, length: l, d1, d2 }) : null;
-      $('#sq-target').innerHTML = sq ? `<div class="stat readout wide"><span class="lbl">Each diagonal, when it’s square</span><span class="v">${fmt.html(sq.target)}</span><span class="h">${fmt.hair(sq.target)}</span></div>` : '';
+      $('#sq-target').innerHTML = sq ? `<div class="stat readout target"><span class="lbl">Each diagonal, when it’s square</span><span class="v">${fmt.html(sq.target)}</span><span class="h">${fmt.hair(sq.target)}</span></div>` : '';
       let out = '';
       if (sq && sq.diff) {
         out = sq.square
-          ? `<p class="verdict ok">Square: the diagonals are within 1/32″ of each other.</p>`
-          : `<p class="verdict no">Out by ${fmt.len(sq.diff)}. Push the two corners at the ends of the ${sq.longer === 1 ? 'first' : 'second'} diagonal toward each other until both read about ${fmt.len(sq.middle)}.</p>`;
-        if (sq.sidesOff) out += `<p class="note">The diagonals average ${fmt.len(sq.middle)}, not ${fmt.len(sq.target)}: check that the sides really are ${fmt.len(w)} and ${fmt.len(l)}, and that opposite sides match.</p>`;
+          ? `<p class="verdict ok">Square: the diagonals are within <span class="rd">1/32″</span> of each other.</p>`
+          : `<p class="verdict no">Out by ${fmt.rd(sq.diff)}. Push the two corners at the ends of the ${sq.longer === 1 ? 'first' : 'second'} diagonal toward each other until both read about ${fmt.rd(sq.middle)}.</p>`;
+        if (sq.sidesOff) out += `<p class="note">The diagonals average ${fmt.rd(sq.middle)}, not ${fmt.rd(sq.target)}: check that the sides really are ${fmt.rd(w)} and ${fmt.rd(l)}, and that opposite sides match.</p>`;
       }
       $('#sq-out').innerHTML = out;
       const t = sq?.tri;
-      $('#sq-345').innerHTML = t ? `<div class="tri345"><h3>Or use 3-4-5</h3><p>From a corner, mark <b>${even(t.a)}</b> along one side and <b>${even(t.b)}</b> along the other. When the corner is square, the two marks are exactly <b>${even(t.c)}</b> apart.</p></div>` : '';
+      $('#sq-345').innerHTML = t ? `<div class="tri345"><h3>Or use 3-4-5</h3><p>From a corner, mark ${even(t.a)} along one side and ${even(t.b)} along the other. When the corner is square, the two marks are exactly ${even(t.c)} apart.</p></div>` : '';
     };
 
     main.querySelectorAll('input').forEach(i => i.addEventListener('input', update));

@@ -110,10 +110,22 @@ await page.click('[data-seg=den] [data-v="16"]');
 await page.click('.sheet .close');
 assert.equal((await tapeLines(page))[0], '= 4′ 6-11/16″');
 
+// Shown in millimetres, a plain number added to a length counts as millimetres.
+await page.click('#settingsBtn');
+await page.click('[data-seg=show] [data-v="mm"]');
+await page.click('.sheet .close');
+assert.equal((await tapeLines(page))[0], '= 1389.1 mm');
+await keys(page, ['1', 'ft', 'plus', '5', 'equals']);
+assert.equal(await text(page, '#read'), '309.8 mm');
+await page.click('#settingsBtn');
+await page.click('[data-seg=show] [data-v="ftin"]');
+await page.click('.sheet .close');
+assert.equal((await tapeLines(page))[5], '= 1′ 3/16″+', '12″ + 5 mm is a hair over 1′ 3/16″');
+
 // The tape is still there after a reload; a new tape keeps the old one in the list.
 await page.reload();
 await page.evaluate(() => document.fonts.ready);
-assert.equal((await tapeLines(page)).length, 5, 'the tape survives a reload');
+assert.equal((await tapeLines(page)).length, 6, 'the tape survives a reload');
 await page.click('#newTape');
 assert.equal((await tapeLines(page)).length, 0);
 await page.click('#tapesBtn');
@@ -121,7 +133,7 @@ assert.equal(await page.locator('.tape-row').count(), 2);
 await page.fill('.tape-row:nth-child(2) .tape-title', 'Kitchen cabinets');
 await page.locator('.tape-row:nth-child(2) .tape-title').dispatchEvent('change');
 await page.click('.tape-row:nth-child(2) [data-act=open]');
-assert.equal((await tapeLines(page)).length, 5, 'the old tape opens again');
+assert.equal((await tapeLines(page)).length, 6, 'the old tape opens again');
 assert.equal(await text(page, '#tapeName'), 'Kitchen cabinets');
 
 // The help sheet's examples type themselves in.

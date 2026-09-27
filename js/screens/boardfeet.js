@@ -14,7 +14,10 @@ const priceOf = text => tryNumber(String(text).replace(/[^\d.,]/g, '')).q;
 // A line on the list is kept as the text typed, so it reads the same way back.
 function lineOf(item) {
   try {
-    const t = parseLength(item.thick), w = parseLength(item.width), l = parseLength(item.length, { bare: 'ft' });
+    // The exact sizes are kept alongside the text typed, so a line reads the same whatever the settings are now.
+    const t = item.t ? fromText(item.t) : parseLength(item.thick);
+    const w = item.w ? fromText(item.w) : parseLength(item.width);
+    const l = item.l ? fromText(item.l) : parseLength(item.length, { bare: 'ft' });
     const n = Number(item.count) || 1;
     const feet = boardFeet({ thick: t, width: w, length: l, count: n });
     const price = item.price ? fromText(item.price) : null;
@@ -76,7 +79,7 @@ export default {
       current = null;
       if (t && w && l) {
         const feet = boardFeet({ thick: t, width: w, length: l, count });
-        current = { feet, price, count };
+        current = { feet, price, count, t, w, l };
         $('#bf-out').innerHTML = `${bf(feet)} <small>bd ft</small>`;
         $('#bf-cost').textContent = price ? fmt.money(mul(feet, price)) : '';
       } else {
@@ -128,7 +131,7 @@ export default {
     $('#bf-add').addEventListener('click', () => {
       if (!current) return;
       const pr = priceOf($('#bf-price').value);
-      store.addLumber({ thick: s.thick.trim(), width: s.width.trim(), length: s.length.trim(), count: current.count, price: pr ? toText(pr) : '', what: s.what.trim() });
+      store.addLumber({ thick: s.thick.trim(), width: s.width.trim(), length: s.length.trim(), t: toText(current.t), w: toText(current.w), l: toText(current.l), count: current.count, price: pr ? toText(pr) : '', what: s.what.trim() });
       drawList();
       toast(`Added ${bf(current.feet)} bd ft`);
     });

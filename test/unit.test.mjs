@@ -80,6 +80,7 @@ test('marks and fractions are tidied however they are typed', () => {
   assert.deepEqual(tokenize('3 ft 7 in').map(t => t.t + ':' + t.v), ['num:3', 'unit:ft', 'num:7', 'unit:in']);
   assert.deepEqual(tokenize('2x4').map(t => t.v), ['2', '×', '4']);
   assert.throws(() => tokenize('3 & 4'), /doesn’t know “&”/);
+  assert.equal(normalize('90°'), '90', 'a degree sign is fine in an angle');
 });
 
 test('lengths typed the ways people write them', () => {

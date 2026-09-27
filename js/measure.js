@@ -40,7 +40,8 @@ export function normalize(text) {
     .replace(/(\d),(?=\d{3}(?!\d))/g, '$1') // 1,100 is eleven hundred
     .replace(/(\d),(\d)/g, '$1.$2') // 1,5 is one and a half
     .replace(/,/g, ' ')
-    .replace(/ /g, ' ');
+    .replace(/\u00a0/g, ' ')
+    .replace(/°/g, ''); // 90° is just 90
 }
 
 const WORD = /^(feet|foot|ft|inches|inch|in|yards|yard|yds|yd|millimet(?:er|re)s?|mm|centimet(?:er|re)s?|cm|met(?:er|re)s?|m)(?![a-z])/i;

@@ -218,7 +218,7 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
   max-width: 520px; margin: 0 auto;
   padding: 10px 12px max(12px, env(safe-area-inset-bottom));
 }
-.roll-wrap { flex: 1 1 0; min-height: 120px; display: flex; flex-direction: column; padding: 0 14px; }
+.roll-wrap { flex: 1 1 0; min-height: 100px; display: flex; flex-direction: column; padding: 0 14px; }
 .roll-head { display: flex; align-items: center; gap: 6px; padding: 0 0 8px; }
 .roll-name {
   flex: 1 1 auto; min-width: 0; text-align: left; border: 0; background: none; padding: 6px 2px;
@@ -368,6 +368,7 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 /* Short phone screens (a browser with its toolbars showing): tighten up so the keys and some tape both fit. */
 @media (max-width: 879px) and (max-height: 780px) {
   .calc { padding-top: 6px; }
+  .roll-wrap { min-height: 64px; }
   .roll-head { padding-bottom: 5px; }
   .case { padding: 9px 9px 11px; border-radius: 18px; }
   .lcd { padding: 3px 10px 5px; margin-bottom: 9px; }
@@ -454,7 +455,9 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 .readout.inline .v { font-size: 32px; }
 .readout.inline .h { font-size: 22px; font-weight: 700; color: var(--lcd-ink); }
 .stats.three .stat:not(.wide) .v { font-size: 28px; }
-.readout.wide { margin: 4px 0 14px; }
+.readout.target { margin: 4px 0 14px; }
+/* A reading inside a sentence, in the tape's typeface */
+.rd { font: 600 1.14em/1 var(--disp); letter-spacing: .01em; white-space: nowrap; }
 
 .note { margin: 6px 0 10px; color: var(--ink-2); font-size: 16px; min-height: 1.4em; }
 .note.bad, .note b { color: var(--bad); }

@@ -64,7 +64,7 @@ export default {
       $('#st-hh').textContent = [fmt.hair(r.riser), fmt.show === 'mm' ? '' : F.decInText(r.riser)].filter(Boolean).join(' · ');
       note.className = 'note';
       note.innerHTML = s.risers != null && s.risers !== r.fewest
-        ? `The fewest risers under ${fmt.len(maxRiser)} is ${r.fewest}. <button type="button" class="link-btn" id="st-fewest">Use ${r.fewest}</button>`
+        ? `The fewest risers under ${fmt.rd(maxRiser)} is ${r.fewest}. <button type="button" class="link-btn" id="st-fewest">Use ${r.fewest}</button>`
         : r.treads ? `${r.n} risers and ${r.treads} ${r.treads === 1 ? 'tread' : 'treads'}; the top step is the floor above.` : 'One step: no treads.';
       const fact = (k, v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
       $('#st-facts').innerHTML = r.treads ? [
