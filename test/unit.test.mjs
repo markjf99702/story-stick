@@ -461,6 +461,7 @@ test('dividing a board into equal parts with a kerf', () => {
   same(plain.piece, Q(24));
   assert.match(T.divideEqual({ length: Q(1), parts: 9, kerf: Q(1, 8) }).error, /eat the whole board/);
   assert.match(T.divideEqual({ length: Q(10), parts: 1 }).error, /2 parts/);
+  assert.match(T.divideEqual({ length: Q(96), parts: 3, kerf: Q(-1, 8) }).error, /kerf can’t be less than nothing/);
 });
 
 test('how many pieces of a set length come out of a board', () => {
@@ -479,6 +480,8 @@ test('how many pieces of a set length come out of a board', () => {
   assert.equal(dust.cuts, 4);
   same(dust.offcut, Q(0));
   assert.match(T.piecesOf({ length: Q(10), piece: Q(12) }).error, /Not even one/);
+  assert.match(T.piecesOf({ length: Q(96), piece: Q(47, 4), kerf: Q(-1, 8) }).error, /kerf can’t be less than nothing/);
+  assert.match(T.piecesOf({ length: Q(96), piece: Q(1, 8), kerf: Q(-1, 8) }).error, /kerf/, 'a piece and a kerf that add up to nothing');
 });
 
 // ---------- Stairs ----------

@@ -187,6 +187,10 @@ await page.click('[data-seg=mode] [data-v=pieces]');
 await page.fill('#dv-piece', '11 3/4');
 assert.match(await text(page, '#dv-stats'), /Pieces 8/i);
 assert.match(await text(page, '#dv-stats'), /Offcut 1″/i);
+await page.fill('#dv-kerf', '-1/8');
+assert.equal(await text(page, '#dv-note'), 'The kerf can’t be less than nothing.');
+assert.equal(await text(page, '#dv-list'), '', 'no overlapping pieces');
+await page.fill('#dv-kerf', '1/8');
 await fits(page, 'divide a board');
 
 await tool('Stairs');

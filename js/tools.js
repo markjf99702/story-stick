@@ -45,6 +45,7 @@ export function divideEqual({ length, parts, kerf = ZERO }) {
   if (!pos(length)) return { error: 'Give the length to divide.' };
   if (!Number.isInteger(parts) || parts < 2) return { error: 'Divide into 2 parts or more.' };
   if (parts > 500) return { error: 'That’s more than 500 parts.' };
+  if (sign(kerf) < 0) return { error: 'The kerf can’t be less than nothing.' };
   const cuts = parts - 1;
   const piece = div(sub(length, mul(Q(cuts), kerf)), Q(parts));
   if (sign(piece) <= 0) return { error: 'The saw cuts would eat the whole board.' };
@@ -55,6 +56,7 @@ export function divideEqual({ length, parts, kerf = ZERO }) {
 export function piecesOf({ length, piece, kerf = ZERO }) {
   if (!pos(length)) return { error: 'Give the length of the board.' };
   if (!pos(piece)) return { error: 'Give the length of one piece.' };
+  if (sign(kerf) < 0) return { error: 'The kerf can’t be less than nothing.' };
   const n = Number(floor(div(add(length, kerf), add(piece, kerf))));
   if (n < 1) return { error: 'Not even one piece fits.', n: 0 };
   if (n > 500) return { error: 'That’s more than 500 pieces.' };
