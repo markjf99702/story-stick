@@ -7,17 +7,20 @@ import { $, esc, fmt, lenField, numField, readLen, readNum, toast, copyText, ICO
 import * as F from '../format.js';
 
 const QUARTERS = ['4/4', '5/4', '6/4', '8/4', '10/4', '12/4', '16/4'];
+// A thickness in quarters of an inch (8/4 is 2″), whatever the settings say a plain number means.
+const IN_QUARTERS = /^\s*\d+\s*\/\s*4\s*$/;
 const bf = q => F.dec(q, 2);
 // A price may come with its money sign: $8.50 or 8.50.
 // A line's sizes, read the same way every time: 8/4 × 7″ × 10′, with the count in front if there's more than one.
-const sizes = x => `${x.n > 1 ? `${x.n} pieces, ` : ''}${/^\s*\d+\s*\/\s*4\s*$/.test(x.thick) ? x.thick.replace(/\s/g, '') : fmt.even(x.t)} × ${fmt.even(x.w)} × ${fmt.even(x.l)}`;
+const sizes = x => `${x.n > 1 ? `${x.n} pieces, ` : ''}${IN_QUARTERS.test(x.thick) ? x.thick.replace(/\s/g, '') : fmt.even(x.t)} × ${fmt.even(x.w)} × ${fmt.even(x.l)}`;
 const priceOf = text => tryNumber(String(text).replace(/[^\d.,]/g, '')).q;
 
 // A line on the list is kept as the text typed, so it reads the same way back.
 function lineOf(item) {
   try {
     // The exact sizes are kept alongside the text typed, so a line reads the same whatever the settings are now.
-    const t = item.t ? fromText(item.t) : parseLength(item.thick);
+    // Quarters are read from the text: lines added in millimetres used to keep 8/4 as 2 mm.
+    const t = IN_QUARTERS.test(item.thick) ? parseLength(item.thick) : item.t ? fromText(item.t) : parseLength(item.thick);
     const w = item.w ? fromText(item.w) : parseLength(item.width);
     const l = item.l ? fromText(item.l) : parseLength(item.length, { bare: 'ft' });
     const n = Number(item.count) || 1;
@@ -75,6 +78,7 @@ export default {
     const update = () => {
       for (const k of ['thick', 'width', 'length', 'count', 'price', 'what']) s[k] = $(`#bf-${k}`).value;
       store.saveTool('board-feet', s);
+      $('#bf-thick').dataset.bare = IN_QUARTERS.test(s.thick) ? 'in' : '';
       const t = readLen('bf-thick'), w = readLen('bf-width'), l = readLen('bf-length');
       const n = readNum('bf-count'), price = priceOf($('#bf-price').value);
       const count = n ? Math.max(1, Math.round(toNumber(n))) : 1;

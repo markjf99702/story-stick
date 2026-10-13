@@ -289,6 +289,33 @@ for (const s of ['', 'spacing', 'divide', 'stairs', 'miters', 'board-feet', 'tri
   await fits(page, `${s || 'the calculator'} on a laptop`);
 }
 assert.equal(await page.locator('#dock').count(), 0, 'no slide-up keypad with a mouse and keyboard');
+
+// Shown in millimetres, thickness in quarters still means inches; a plain number is millimetres.
+await page.click('#settingsBtn');
+await page.click('[data-seg=show] [data-v="mm"]');
+await page.click('.sheet .close');
+await page.goto(base + '#/board-feet');
+await page.locator('.tool-head').waitFor();
+assert.equal(await text(page, '#bf-out'), '4 bd ft', '4/4 × 6″ × 8′ with lengths in millimetres');
+assert.equal(await text(page, '#bf-thick-reads'), '= 25.4 mm');
+await page.click('[data-q="8/4"]');
+assert.equal(await text(page, '#bf-out'), '8 bd ft');
+await page.fill('#bf-what', 'White oak');
+await page.fill('#bf-price', '12');
+await page.click('#bf-add');
+assert.equal(await text(page, '.lumber li'), 'White oak 8/4 × 152.4 mm × 2438.4 mm 8 bd ft $96.00');
+await page.fill('#bf-thick', '25');
+assert.equal(await text(page, '#bf-out'), '3.94 bd ft', '25 is millimetres');
+// A line added in millimetres before quarters were read as inches kept 8/4 as 2 mm; it reads right now.
+await page.evaluate(() => {
+  const s = JSON.parse(localStorage.getItem('story-stick'));
+  s.lumber.push({ id: 'old', thick: '8/4', width: '6″', length: '8′', t: '10/127', w: '6/1', l: '96/1', count: 1, price: '12/1', what: 'Red oak' });
+  localStorage.setItem('story-stick', JSON.stringify(s));
+});
+await page.reload();
+await page.locator('.lumber li').nth(1).waitFor();
+assert.equal(await text(page, '.lumber li:nth-child(2)'), 'Red oak 8/4 × 152.4 mm × 2438.4 mm 8 bd ft $96.00');
+assert.match(await text(page, '.total'), /16 bd ft \$192.00/);
 await laptop.ctx.close();
 
 assert.deepEqual(problems.filter(p => !p.startsWith('failed:')), [], 'problems while using it');
