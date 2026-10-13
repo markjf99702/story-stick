@@ -2,7 +2,7 @@
 // The calculator has it on screen all the time; on a touch screen it also slides up for any length box in the tools.
 import { applyKey } from './keys.js';
 import { $, ICON, touch, fmt, esc } from './ui.js';
-import { store, unpack } from './store.js';
+import { store, tryUnpack } from './store.js';
 import { exactText } from './format.js';
 
 // [key, label, aria-label, class, span]
@@ -95,7 +95,7 @@ export function initDock() {
     dockInput = input;
     const label = input.closest('.field')?.querySelector('.label')?.textContent || '';
     $('#dockLabel', dock).textContent = label;
-    const last = [...store.tape.lines].reverse().map(l => unpack(l.v)).find(v => v.dim === 1);
+    const last = [...store.tape.lines].reverse().map(tryUnpack).find(v => v?.dim === 1);
     const tape = $('#dockTape', dock);
     tape.hidden = !last;
     if (last) {

@@ -128,11 +128,13 @@ $('#toolsBtn').addEventListener('click', toolsSheet);
 $('#settingsBtn').addEventListener('click', settingsSheet);
 $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); }); // a tap outside closes it
 window.addEventListener('hashchange', route);
-route();
 
 // For the tests and the screenshots.
 window.storyStick = { store, route };
 
+// Before the first screen is drawn, so nothing going wrong in it can stop the offline copy.
 if ('serviceWorker' in navigator && !('single' in document.documentElement.dataset) && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+route();

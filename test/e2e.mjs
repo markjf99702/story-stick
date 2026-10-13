@@ -327,6 +327,38 @@ assert.equal(await text(page, '.lumber li:nth-child(2)'), 'Red oak 8/4 × 152.4 
 assert.match(await text(page, '.total'), /16 bd ft \$192.00/);
 await laptop.ctx.close();
 
+// ---------- A save that doesn't all read back ----------
+// Edited by hand, or written by a later version: what reads back shows, and the rest is kept in the save.
+const odd = await device({ width: 1280, height: 800 }, false);
+page = odd.page;
+await page.goto(base);
+const save = data => page.evaluate(d => localStorage.setItem('story-stick', JSON.stringify(d)), data);
+await save({
+  v: 1, settings: { den: 'abc', show: 'yards' },
+  tape: { id: 'a', name: 'Odd one', at: 1, lines: [{ e: '1"', v: { q: 'x', dim: 1 }, at: 1 }, { e: '2"', v: { q: '2/1', dim: 1 }, at: 2 }] },
+  tapes: [{ id: 'b', name: 'No lines', at: 1 }],
+});
+await page.reload();
+assert.deepEqual(await tapeLines(page), ['= 2″'], 'the line that reads back is on the tape');
+assert.equal(await text(page, '#tapeCount'), '· 1 sum');
+await page.keyboard.type('3"');
+await page.keyboard.press('Enter');
+assert.equal(await text(page, '#read'), '3″');
+assert.deepEqual(await tapeLines(page), ['= 2″', '= 3″']);
+await page.click('#tapesBtn');
+assert.match(await text(page, '.tape-row:nth-child(2) .meta'), /^0 sums$/);
+await page.click('.sheet .close');
+const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('story-stick')));
+assert.equal(kept.tape.lines.length, 3, 'the line that does not read back is kept');
+assert.deepEqual([kept.settings.den, kept.settings.show], [16, 'ftin']);
+await save({ v: 1, tape: { id: 'c', name: '', at: 1 }, tapes: [] });
+await page.reload();
+assert.match(await text(page, '#lines'), /Each sum prints here/);
+await page.keyboard.type(`1' + 1"`);
+await page.keyboard.press('Enter');
+assert.deepEqual(await tapeLines(page), ['= 1′ 1″']);
+await odd.ctx.close();
+
 assert.deepEqual(problems.filter(p => !p.startsWith('failed:')), [], 'problems while using it');
 await browser.close();
 server.close();

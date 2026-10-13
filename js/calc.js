@@ -3,7 +3,7 @@
 import { evaluate, preview, UNITS } from './measure.js';
 import { Q, mul, sub, floor, isInt, sign, toNumber } from './rational.js';
 import * as F from './format.js';
-import { store, unpack } from './store.js';
+import { store, tryUnpack } from './store.js';
 import { $, esc, fmt, touch, toast, openSheet, closeSheet, copyText, ICON } from './ui.js';
 import { keypadHTML, bindKeypad } from './keypad.js';
 
@@ -67,8 +67,8 @@ export function renderCalc(main) {
     if (e.key === 'Enter') { e.preventDefault(); equals(); }
     else if (e.key === 'Escape') { e.preventDefault(); input.value = ''; done = null; input.classList.remove('done'); show(null); }
     else if (e.key === 'ArrowUp' && !input.value) {
-      const lines = store.tape.lines;
-      if (lines.length) { e.preventDefault(); input.value = lines[lines.length - 1].e; done = null; live(); }
+      const last = store.tape.lines.at(-1)?.e;
+      if (typeof last === 'string') { e.preventDefault(); input.value = last; done = null; live(); }
     }
   });
   // Typing after = : a sign carries on from the answer, anything else starts again.
@@ -207,35 +207,34 @@ export function tapeText(v) {
 }
 
 const pretty = e => esc(e).replace(/'/g, '′').replace(/"/g, '″').replace(/\*/g, '×');
+// The lines whose answers read back, each with its place on the tape. One from a save edited by hand, or written
+// by a later version, is left out here but stays in the save.
+const readable = t => t.lines.map((l, i) => ({ l, i, v: tryUnpack(l) })).filter(x => x.v);
 const when = t => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 const clock = t => new Date(t).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 export const tapeTitle = (t, withTime = false) => t.name || `Tape from ${when(t.at)}${withTime ? `, ${clock(t.at)}` : ''}`;
 
 function drawTape() {
-  const t = store.tape;
+  const t = store.tape, rows = readable(t);
   $('#tapeName').textContent = tapeTitle(t);
-  $('#tapeCount').textContent = t.lines.length ? ` · ${t.lines.length} ${t.lines.length === 1 ? 'sum' : 'sums'}` : '';
-  if (!t.lines.length) {
+  $('#tapeCount').textContent = rows.length ? ` · ${rows.length} ${rows.length === 1 ? 'sum' : 'sums'}` : '';
+  if (!rows.length) {
     els.lines.innerHTML = `<li class="empty">
         <p>Each sum prints here when you press =. Tap one to use its answer again.</p>
         <p class="try">Try one:</p>
         ${EXAMPLES.map(([x, why]) => `<button type="button" class="ex" data-example="${esc(x)}"><span>${esc(x)}</span><small>${esc(why)}</small></button>`).join('')}
       </li>`;
   } else {
-    els.lines.innerHTML = t.lines.map((l, i) => {
-      const v = unpack(l.v);
-      return `<li><button type="button" class="line" data-line="${i}" aria-label="Use ${esc(answerText(v))}">
-          <span class="e">${pretty(l.e)}</span><span class="r"><span class="eq">=</span> ${tapeText(v)}</span></button></li>`;
-    }).join('');
+    els.lines.innerHTML = rows.map(({ l, i, v }) => `<li><button type="button" class="line" data-line="${i}" aria-label="Use ${esc(answerText(v))}">
+          <span class="e">${pretty(l.e)}</span><span class="r"><span class="eq">=</span> ${tapeText(v)}</span></button></li>`).join('');
   }
   els.roll.scrollTop = els.roll.scrollHeight;
 }
 
 // Puts a past answer into the sum: on its own, after a sign, or added on with a +.
 function useLine(i) {
-  const l = store.tape.lines[i];
-  if (!l) return;
-  const v = unpack(l.v);
+  const v = tryUnpack(store.tape.lines[i]);
+  if (!v) return;
   let text = F.exactText(v);
   const cur = done ? '' : input.value.replace(/\s+$/, '');
   if (!cur) input.value = text;
@@ -253,10 +252,10 @@ function useLine(i) {
 function tapesSheet() {
   const all = [store.tape, ...store.tapes];
   const row = (t, i) => {
-    const last = t.lines.at(-1);
+    const lines = readable(t), last = lines.at(-1);
     return `<li class="tape-row${i === 0 ? ' current' : ''}" data-id="${t.id}">
         <input class="tape-title" value="${esc(t.name)}" placeholder="${esc(tapeTitle({ ...t, name: '' }, true))}" aria-label="Name this tape" maxlength="60">
-        <p class="meta">${i === 0 ? 'On the calculator now · ' : ''}${t.lines.length} ${t.lines.length === 1 ? 'sum' : 'sums'}${last ? ` · last: <span class="rd">${tapeText(unpack(last.v))}</span>` : ''}</p>
+        <p class="meta">${i === 0 ? 'On the calculator now · ' : ''}${lines.length} ${lines.length === 1 ? 'sum' : 'sums'}${last ? ` · last: <span class="rd">${tapeText(last.v)}</span>` : ''}</p>
         <div class="row-btns">
           ${i ? '<button type="button" class="btn small" data-act="open">Open</button>' : ''}
           <button type="button" class="btn small" data-act="copy">Copy</button>
@@ -289,11 +288,7 @@ function tapesSheet() {
 }
 
 export function tapeAsText(t) {
-  const lines = t.lines.map(l => {
-    const v = unpack(l.v);
-    const r = answerText(v);
-    return `${l.e.replace(/'/g, '′').replace(/"/g, '″')}\n  = ${r}`;
-  });
+  const lines = readable(t).map(({ l, v }) => `${String(l.e ?? '').replace(/'/g, '′').replace(/"/g, '″')}\n  = ${answerText(v)}`);
   return `${tapeTitle(t)}\n\n${lines.join('\n')}\n`;
 }
 

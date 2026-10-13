@@ -5,6 +5,7 @@ const KEY = 'story-stick';
 const MAX_TAPES = 20, MAX_LINES = 300;
 
 export const DEFAULTS = { den: 16, show: 'ftin', money: '$' };
+const DENS = [8, 16, 32, 64], SHOWS = ['ftin', 'in', 'mm'];
 
 const newTape = () => ({ id: Math.random().toString(36).slice(2, 10), name: '', at: Date.now(), lines: [] });
 
@@ -13,8 +14,16 @@ function read() {
     const data = JSON.parse(localStorage.getItem(KEY));
     if (data && data.v === 1 && data.tape && Array.isArray(data.tapes)) {
       data.settings = { ...DEFAULTS, ...data.settings };
-      data.tools ||= {};
-      data.lumber ||= [];
+      // A save edited by hand, or written by a later version, may not all make sense here. Settings the page
+      // can't use go back to the defaults, and a tape with no list of lines gets an empty one; lines that
+      // don't read back are kept, and skipped where the tape is shown (tryUnpack).
+      if (!DENS.includes(data.settings.den)) data.settings.den = DEFAULTS.den;
+      if (!SHOWS.includes(data.settings.show)) data.settings.show = DEFAULTS.show;
+      if (typeof data.tape !== 'object') data.tape = newTape();
+      data.tapes = data.tapes.filter(t => t && typeof t === 'object');
+      for (const t of [data.tape, ...data.tapes]) if (!Array.isArray(t.lines)) t.lines = [];
+      if (!data.tools || typeof data.tools !== 'object') data.tools = {};
+      if (!Array.isArray(data.lumber)) data.lumber = [];
       return data;
     }
   } catch { /* a private window, blocked storage or bad data: start fresh */ }
@@ -30,9 +39,14 @@ function write() {
 // A value on the tape, stored as text so it keeps every digit: { n: '875', d: '16', dim: 1 }.
 export const pack = v => ({ q: toText(v.q), dim: v.dim, ...(v.count ? { of: toText(v.count.of), each: toText(v.count.each) } : {}) });
 export function unpack(p) {
+  if (![0, 1, 2, 3].includes(p.dim)) throw new SyntaxError('not a kind of value: ' + p.dim);
   const v = { q: fromText(p.q), dim: p.dim };
   if (p.of) v.count = { of: fromText(p.of), each: fromText(p.each) };
   return v;
+}
+// A line's answer, or null when it doesn't read back.
+export function tryUnpack(line) {
+  try { return unpack(line.v); } catch { return null; }
 }
 
 export const store = {
