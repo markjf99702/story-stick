@@ -139,6 +139,7 @@ assert.equal(await text(page, '#tapeName'), 'Kitchen cabinets');
 
 // The help sheet's examples type themselves in.
 await page.click('#helpBtn');
+assert.match(await text(page, '#sheet .sheet-body'), /the way you’d write it down.*They’re rounded/, 'curly apostrophes, like the rest of the page');
 await page.click('[data-try="3 ft 7 in"]');
 assert.equal(await page.inputValue('#expr'), '3 ft 7 in');
 assert.equal(await text(page, '#also'), '43″ 1092.2 mm', 'no decimal when it says the same');

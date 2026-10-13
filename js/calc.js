@@ -311,10 +311,10 @@ function helpSheet() {
   ];
   const body = openSheet(`
     <div class="sheet-top"><h2>How to type</h2><button type="button" class="close" aria-label="Close">${ICON.x}</button></div>
-    <p>Type a length the way you'd write it down. On the keypad, a number and then ${KF(16)} counts sixteenths: <b>5</b> ${KF(16)} is 5/16. Press <b>space</b> between whole inches and the fraction: <b>7</b> space <b>5</b> ${KF(16)} is 7 5/16. A fraction key on its own is one of them: ${KF(2)} is 1/2.</p>
+    <p>Type a length the way you’d write it down. On the keypad, a number and then ${KF(16)} counts sixteenths: <b>5</b> ${KF(16)} is 5/16. Press <b>space</b> between whole inches and the fraction: <b>7</b> space <b>5</b> ${KF(16)} is 7 5/16. A fraction key on its own is one of them: ${KF(2)} is 1/2.</p>
     <ul class="help-list">${rows.map(([x, why]) => `<li><button type="button" class="ex" data-try="${esc(x)}"><span>${esc(x)}</span><small>${esc(why)}</small></button></li>`).join('')}</ul>
     <p class="hint">A plain number added to a length counts as inches (or millimetres, if Settings shows millimetres). × and ÷ go before + and −; use brackets to change that.</p>
-    <p class="hint">Answers are exact, however many steps they take. They're rounded to the nearest ${fmt.den === 16 ? '1/16' : '1/' + fmt.den} only for showing, and <b>+ a hair</b> or <b>− a hair</b> says how much the rounding left out. Change the rounding in Settings.</p>`);
+    <p class="hint">Answers are exact, however many steps they take. They’re rounded to the nearest ${fmt.den === 16 ? '1/16' : '1/' + fmt.den} only for showing, and <b>+ a hair</b> or <b>− a hair</b> says how much the rounding left out. Change the rounding in Settings.</p>`);
   body.addEventListener('click', e => {
     if (e.target.closest('.close')) return closeSheet();
     const b = e.target.closest('[data-try]');
