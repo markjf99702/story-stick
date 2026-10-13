@@ -103,6 +103,8 @@ export function renderCalc(main) {
   });
 
   drawTape();
+  // The answer from = stays on show only while there's a tape it came from (Clear everything empties it).
+  if (!store.tape.lines.length) done = null;
   if (done) { input.value = store.tape.lines.at(-1)?.e || ''; input.classList.add('done'); show(done); }
   else live();
   if (!touch) input.focus();

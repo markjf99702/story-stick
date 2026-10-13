@@ -299,6 +299,21 @@ for (const s of ['', 'spacing', 'divide', 'stairs', 'miters', 'board-feet', 'tri
 }
 assert.equal(await page.locator('#dock').count(), 0, 'no slide-up keypad with a mouse and keyboard');
 
+// Clear everything takes the answer off the LCD too, so a sign after it has nothing to carry on from.
+await page.goto(base + '#/');
+await page.locator('.calc').waitFor();
+await page.keyboard.type(`5' + 1"`);
+await page.keyboard.press('Enter');
+assert.equal(await text(page, '#read'), '5′ 1″');
+await page.click('#settingsBtn');
+page.once('dialog', d => d.accept());
+await page.click('#forget');
+assert.match(await page.getAttribute('#read', 'class'), /idle/, 'the LCD is cleared');
+assert.equal(await text(page, '#also'), '');
+await page.keyboard.type('+');
+assert.equal(await page.inputValue('#expr'), '+');
+await page.keyboard.press('Escape');
+
 // Shown in millimetres, thickness in quarters still means inches; a plain number is millimetres.
 await page.click('#settingsBtn');
 await page.click('[data-seg=show] [data-v="mm"]');
