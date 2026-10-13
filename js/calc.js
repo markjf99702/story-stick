@@ -208,7 +208,8 @@ export function tapeText(v) {
   return esc(v.dim === 2 ? F.areaText(v.q) : `${F.volumeText(v.q)} · ${F.boardFeetText(v.q)}`);
 }
 
-const pretty = e => esc(e).replace(/'/g, '′').replace(/"/g, '″').replace(/\*/g, '×');
+// Typed marks (' " *) shown as ′ ″ ×, swapped before escaping, which would turn ' and " into entities.
+const pretty = e => esc(String(e ?? '').replace(/'/g, '′').replace(/"/g, '″').replace(/\*/g, '×'));
 // The lines whose answers read back, each with its place on the tape. One from a save edited by hand, or written
 // by a later version, is left out here but stays in the save.
 const readable = t => t.lines.map((l, i) => ({ l, i, v: tryUnpack(l) })).filter(x => x.v);

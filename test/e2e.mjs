@@ -285,6 +285,7 @@ assert.equal(await page.evaluate(() => document.activeElement.id), 'expr', 'the 
 await page.keyboard.type(`3' 7-5/16" + 11 3/8"`);
 await page.keyboard.press('Enter');
 assert.deepEqual(await tapeLines(page), ['= 4′ 6-11/16″']);
+assert.equal(await text(page, '#lines .line .e'), '3′ 7-5/16″ + 11 3/8″', 'typed marks print as feet and inch marks');
 await page.keyboard.type('*2');
 assert.equal(await page.inputValue('#expr'), '4′ 6-11/16″ × 2');
 await page.keyboard.press('Enter');
