@@ -318,6 +318,27 @@ test('decimals, millimetres and plain numbers', () => {
   assert.equal(F.degText(31.6166), '31.62°');
 });
 
+test('millimetres are worked out from the exact length, and a half rounds away from zero', () => {
+  // 1/4″ is exactly 6.35 mm. As a float, 0.25 × 25.4 is 6.3499…, which used to show as 6.3.
+  assert.equal(F.mmText(Q(1, 4)), '6.4 mm');
+  assert.equal(F.mmText(Q(3, 4)), '19.1 mm');
+  assert.equal(F.mmText(inch(2, 1, 4)), '57.2 mm');
+  assert.equal(F.mmText(Q(1, 8), 2), '3.18 mm');
+  assert.equal(F.mmText(Q(3, 8), 2), '9.53 mm');
+  assert.equal(F.mmText(Q(-1, 4)), '−6.4 mm');
+  assert.equal(F.lenText(Q(1, 4), { show: 'mm' }), '6.4 mm');
+  assert.equal(F.lenHTML(Q(3, 4), { show: 'mm' }), '19.1<small> mm</small>');
+  assert.equal(F.mmText(Math.SQRT2), '35.9 mm', 'a square root stays a plain number');
+  // Every eighth up to a foot, against whole-number arithmetic: k/8″ is k × 3175 thousandths of a millimetre.
+  for (let k = 1; k <= 96; k++) {
+    const thou = k * 3175;
+    assert.equal(F.mmText(Q(k, 8)), `${F.dec(Math.floor((thou + 50) / 100) / 10, 1)} mm`, `${k}/8″`);
+    assert.equal(F.mmText(Q(k, 8), 2), `${F.dec(Math.floor((thou + 5) / 10) / 100, 2)} mm`, `${k}/8″`);
+  }
+  assert.equal(F.dec(Q(201, 200), 2), '1.01', 'exactly 1.005');
+  assert.equal(F.dec(Q(-1, 100000)), '0');
+});
+
 test('every answer types back in to exactly the same value', () => {
   const values = [
     { q: inch(54, 11, 16), dim: 1 }, { q: Q(5500, 127), dim: 1 }, { q: Q(100, 3), dim: 1 }, { q: Q(-775, 16), dim: 1 },
@@ -622,7 +643,9 @@ test('the nearest fraction at each size', () => {
   const chart = T.fractionChart(16);
   assert.equal(chart.length, 15);
   assert.deepEqual(chart[7], { n: 1, d: 2, inches: 0.5, mm: 12.7 });
-  assert.deepEqual(chart[4], { n: 5, d: 16, inches: 0.3125, mm: 7.9375 });
+  assert.deepEqual(chart[4], { n: 5, d: 16, inches: 0.3125, mm: 7.94 });
+  // Millimetres to 2 places from the exact value: 1/8″ is 3.175 mm, so 3.18.
+  assert.deepEqual(T.fractionChart(8).map(r => r.mm), [3.18, 6.35, 9.53, 12.7, 15.88, 19.05, 22.23]);
 });
 
 // ---------- The keypad ----------

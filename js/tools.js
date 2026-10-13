@@ -208,7 +208,8 @@ export function fractionChart(den) {
   const out = [];
   for (let k = 1; k < den; k++) {
     const q = Q(k, BigInt(den));
-    out.push({ n: Number(q.n), d: Number(q.d), inches: k / den, mm: (k / den) * 25.4 });
+    // Millimetres to 2 places, rounded from the exact value: k × 2540 / den is exact in binary for den up to 64.
+    out.push({ n: Number(q.n), d: Number(q.d), inches: k / den, mm: Math.round((k * 2540) / den) / 100 });
   }
   return out;
 }

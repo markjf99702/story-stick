@@ -3,7 +3,7 @@ import { nearestFractions, fractionChart } from '../tools.js';
 import { store } from '../store.js';
 import { $, fmt, lenField, readLen, seg, onSeg } from '../ui.js';
 import * as F from '../format.js';
-import { toNumber } from '../rational.js';
+import { Q, mul, toNumber } from '../rational.js';
 
 export default {
   id: 'convert',
@@ -46,7 +46,7 @@ export default {
         row('Decimal inches', F.decInText(q, 5)),
         row('Decimal feet', F.decFtText(q, 5)),
         row('Millimetres', F.mmText(q, 2)),
-        row('Metres', `${F.dec(toNumber(q) * 0.0254, 5)} m`),
+        row('Metres', `${F.dec(mul(q, Q(127, 5000)), 5)} m`),
       ].join('');
       $('#cv-near').innerHTML = nearestFractions(q).map(r => {
         const off = Math.abs(r.off) < 1e-9 ? '<span class="exact">exact</span>' : `${F.dec(Math.abs(r.off), 4)}″ ${r.off > 0 ? 'over' : 'under'}`;

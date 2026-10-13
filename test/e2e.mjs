@@ -243,6 +243,11 @@ await page.fill('#cv-v', '18mm');
 assert.match(await text(page, '#cv-near'), /32nd 23⁄32″ 0.0101″ over/i);
 await page.click('[data-seg=chart] [data-v="64"]');
 assert.equal(await page.locator('#cv-chart tr').count(), 63);
+// 1/8″ is exactly 3.175 mm, so 3.18 to two places.
+await page.fill('#cv-v', '1/8"');
+assert.match(await text(page, '#cv-out'), /Millimetres 3\.18 mm Metres 0\.00318 m/i);
+assert.equal(await text(page, '#cv-chart tr:nth-child(8)'), '1⁄8″ 0.125000 3.18');
+await page.fill('#cv-v', '18mm');
 await fits(page, 'convert');
 
 // Everything typed in the tools is still there after a reload.

@@ -31,13 +31,22 @@ export function parts(t, den) {
 }
 
 // Trims a fixed-point number: 54.6875, 54.7, 54.
+// An exact fraction is rounded exactly, a half away from zero as on a tape: 6.35 to one place is 6.4.
 export function dec(x, places = 4) {
-  const v = num(x);
+  if (typeof x !== 'number') return decExact(x, places);
+  const v = x;
   if (!Number.isFinite(v)) return '—';
   let s = v.toFixed(places);
   if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '');
   if (s === '-0') s = '0';
   return s.replace('-', MINUS);
+}
+function decExact(q, places) {
+  const scale = 10n ** BigInt(places);
+  const t = round(mul(q, Q(scale)));
+  const a = t < 0n ? -t : t;
+  const frac = places ? String(a % scale).padStart(places, '0').replace(/0+$/, '') : '';
+  return (t < 0n ? MINUS : '') + (a / scale) + (frac ? '.' + frac : '');
 }
 
 // Inches with a fraction, no feet: 54-11/16″ (or 11/16″, or 54″).
@@ -67,8 +76,11 @@ export function lenHTML(x, { den = 16, show = 'ftin' } = {}) {
   return `${sgn}${p.ft}′&#8202;<span class="in">${inches(p.inch, !p.n)}</span>`;
 }
 
-export function mmText(x, places = 1) { return `${dec(num(x) * 25.4, places)} mm`; }
-function mmHTML(x) { return `${dec(num(x) * 25.4, 1)}<small> mm</small>`; }
+// Millimetres from an exact length are exact too (25.4 is 127/5); a square root or an angle stays a float.
+const MM = Q(127, 5);
+const mmOf = x => (typeof x === 'number' ? x * 25.4 : mul(x, MM));
+export function mmText(x, places = 1) { return `${dec(mmOf(x), places)} mm`; }
+function mmHTML(x) { return `${dec(mmOf(x), 1)}<small> mm</small>`; }
 export const decInText = (x, places = 4) => `${dec(x, places)}″`;
 export const decFtText = (x, places = 4) => `${dec(num(x) / 12, places)} ft`;
 
