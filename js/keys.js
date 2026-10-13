@@ -41,9 +41,10 @@ export function applyKey(text, start, end, key, last = '') {
       return op === '−' ? put('−') : { text, caret: start };
     }
     if (endsWithOp(before)) {
-      // Minus after another sign makes a negative number; any other sign replaces the last one.
+      // Minus after another sign makes a negative number; any other sign replaces the last one,
+      // and the minus after it if there was one (3 × − then + is 3 +).
       if (op === '−' && !/[−\-]\s*$/.test(before)) return put('−');
-      before = before.replace(/\s*[+−\-×÷]\s*$/, '');
+      before = before.replace(op === '−' ? /\s*[+−\-×÷]\s*$/ : /(\s*[+−\-×÷])+\s*$/, '');
       if (!before.trim()) return { text: after, caret: 0 };
     }
     before = before.replace(/\s+$/, '');

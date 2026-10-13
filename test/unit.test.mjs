@@ -675,6 +675,10 @@ test('the keypad types a tape reading the natural way', () => {
 test('signs on the keypad', () => {
   assert.equal(press(['3', 'plus', 'minus']), '3 + −', 'minus after a sign makes a negative');
   assert.equal(press(['3', 'plus', 'times']), '3 × ', 'another sign replaces the last');
+  assert.equal(press(['3', 'times', 'minus', 'plus']), '3 + ', 'and the minus after it too');
+  assert.equal(press(['3', 'times', 'minus', 'times']), '3 × ');
+  same(evaluate(press(['3', 'divide', 'minus', 'plus', '2'])).q, Q(5), '3 ÷ − + 2 is 3 + 2');
+  assert.equal(press(['minus', 'plus']), '');
   assert.equal(press(['minus', '3']), '−3');
   assert.equal(press(['plus']), '', 'nothing to add to yet');
   assert.equal(press(['times', '2'], { last: '4′ 6-11/16″' }), '4′ 6-11/16″ × 2', 'a sign first carries on from the last answer');
