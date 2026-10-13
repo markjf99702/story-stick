@@ -40,9 +40,10 @@ export default {
       const q = readLen('cv-v', { quiet: true });
       if (!q) { $('#cv-out').innerHTML = ''; $('#cv-near').innerHTML = ''; return; }
       const row = (k, v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
+      const feet = Math.abs(toNumber(q)) >= 12; // a foot or more either way reads in feet and inches
       $('#cv-out').innerHTML = [
-        row(toNumber(q) >= 12 ? 'Feet and inches' : 'Inches', F.lenHTML(q, { den: fmt.den, show: 'ftin' }) + (fmt.hair(q) ? ` <small>${fmt.hair(q)}</small>` : '')),
-        toNumber(q) >= 12 ? row('Inches', F.lenHTML(q, { den: fmt.den, show: 'in' })) : '',
+        row(feet ? 'Feet and inches' : 'Inches', F.lenHTML(q, { den: fmt.den, show: 'ftin' }) + (fmt.hair(q) ? ` <small>${fmt.hair(q)}</small>` : '')),
+        feet ? row('Inches', F.lenHTML(q, { den: fmt.den, show: 'in' })) : '',
         row('Decimal inches', F.decInText(q, 5)),
         row('Decimal feet', F.decFtText(q, 5)),
         row('Millimetres', F.mmText(q, 2)),

@@ -643,6 +643,10 @@ test('the nearest fraction at each size', () => {
   close(rows[5].off, 19 / 64 - 0.3);
   const mm18 = T.nearestFractions(R.mul(Q(18), UNITS.mm), [32, 64]);
   assert.deepEqual(mm18.map(r => r.t), [23, 45], '18 mm is about 23/32″, or 45/64″');
+  // A half goes away from zero, as in the tape reading: −1/32″ is −1/16″ to the nearest sixteenth.
+  assert.deepEqual(T.nearestFractions(Q(-1, 32), [16, 32]).map(r => r.t), [-1, -1]);
+  assert.deepEqual(T.nearestFractions(Q(-3, 32), [8, 16]).map(r => r.t), [-1, -2]);
+  assert.deepEqual(T.nearestFractions(Q(1, 32), [16]).map(r => r.t), [1]);
   const chart = T.fractionChart(16);
   assert.equal(chart.length, 15);
   assert.deepEqual(chart[7], { n: 1, d: 2, inches: 0.5, mm: 12.7 });

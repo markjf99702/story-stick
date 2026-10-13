@@ -252,6 +252,11 @@ assert.equal(await page.locator('#cv-chart tr').count(), 63);
 await page.fill('#cv-v', '1/8"');
 assert.match(await text(page, '#cv-out'), /Millimetres 3\.18 mm Metres 0\.00318 m/i);
 assert.equal(await text(page, '#cv-chart tr:nth-child(8)'), '1⁄8″ 0.125000 3.18');
+// A negative size reads the same way as a positive one.
+await page.fill('#cv-v', "-13'");
+assert.match(await text(page, '#cv-out'), /^Feet and inches −13′ 0″ Inches −156″ /i);
+await page.fill('#cv-v', '-1/32"');
+assert.match(await text(page, '#cv-near'), /sixteenth −1⁄16″ 0.0313″ under/i);
 await page.fill('#cv-v', '18mm');
 await fits(page, 'convert');
 

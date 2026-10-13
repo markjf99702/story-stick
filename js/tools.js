@@ -1,6 +1,6 @@
 // The maths behind each workshop tool. No page code here, so the tests run it in Node.
 // Lengths are exact fractions of an inch wherever they can be; square roots and angles are plain numbers.
-import { Q, ZERO, add, sub, mul, div, cmp, ceil, floor, toNumber, sign, isZero, absQ } from './rational.js';
+import { Q, ZERO, add, sub, mul, div, cmp, ceil, floor, round, toNumber, sign, isZero, absQ } from './rational.js';
 
 const num = x => (typeof x === 'number' ? x : toNumber(x));
 const RAD = Math.PI / 180;
@@ -201,7 +201,7 @@ export function threeFourFive(a, b) {
 export const FRACTION_SIZES = [2, 4, 8, 16, 32, 64];
 export function nearestFractions(x, dens = FRACTION_SIZES) {
   return dens.map(den => {
-    const t = Number(floor(add(mul(x, Q(den)), HALF))); // half up
+    const t = Number(round(mul(x, Q(den)))); // a half away from zero, as the tape reading rounds
     return { den, t, off: num(sub(Q(t, BigInt(den)), x)) }; // off: shown − exact, in inches
   });
 }
