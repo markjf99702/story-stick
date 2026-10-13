@@ -52,6 +52,7 @@ assert.equal(await page.title(), 'Story Stick');
 assert.equal(await page.evaluate(() => matchMedia('(pointer: coarse)').matches), true, 'a phone gets the touch layout');
 assert.equal(await page.getAttribute('#expr', 'inputmode'), 'none', 'the phone keyboard stays away from the sum');
 assert.match(await text(page, '#lines'), /Each sum prints here/);
+assert.equal(await page.evaluate(() => document.getElementById('roll').scrollTop), 0, 'an empty tape starts at the top, where it says what it is');
 await fits(page, 'the calculator');
 
 // 3′ 7-5/16″ + 11 3/8″, typed on the keypad.

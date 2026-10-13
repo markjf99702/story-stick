@@ -231,7 +231,8 @@ function drawTape() {
     els.lines.innerHTML = rows.map(({ l, i, v }) => `<li><button type="button" class="line" data-line="${i}" aria-label="Use ${esc(answerText(v))}">
           <span class="e">${pretty(l.e)}</span><span class="r"><span class="eq">=</span> ${tapeText(v)}</span></button></li>`).join('');
   }
-  els.roll.scrollTop = els.roll.scrollHeight;
+  // The newest sum at the bottom in view; an empty tape from the top, where it says what it's for.
+  els.roll.scrollTop = rows.length ? els.roll.scrollHeight : 0;
 }
 
 // Puts a past answer into the sum: on its own, after a sign, or added on with a +.
