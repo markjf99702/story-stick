@@ -165,6 +165,7 @@ await page.click('#dockTape');
 assert.equal(await page.inputValue('#sp-space'), '309.8mm', 'exactly, as millimetres');
 assert.equal(await text(page, '#sp-space-reads'), '= 1′ 3⁄16″');
 await page.click('#dockDone');
+assert.equal(await page.getAttribute('#sp-gap', 'placeholder'), '3-7/8″', 'a railing gap has to stay under 4″');
 await page.click('[data-p=balusters]');
 await padType('sp-space', ['6', 'ft']);
 assert.equal(await page.inputValue('#sp-space'), '6′');

@@ -36,7 +36,7 @@ export default {
             </div>
             ${lenField('sp-space', 'Space to fill', s.space, { placeholder: '6′', hint: 'Between the posts, or end to end' })}
             ${lenField('sp-width', 'Width of each one', s.width, { placeholder: '1-1/2″' })}
-            ${lenField('sp-gap', 'Largest gap', s.gap, { placeholder: '4″' })}
+            ${lenField('sp-gap', 'Largest gap', s.gap, { placeholder: '3-7/8″' })}
             <div class="field"><span class="label">At the ends</span>
               ${seg('ends', [['gaps', 'A gap at each end'], ['items', 'One at each end']], s.ends, 'At the ends')}</div>
             <p class="hint small">Railings: code wants gaps a 4″ ball can’t pass through (IRC R312.1.3), so keep them under 4″.</p>
