@@ -73,7 +73,7 @@ export function tokenize(text) {
     else if (c === '/') tok = { t: 'slash', v: '/', len: 1 };
     else if (c === '(' || c === '[') tok = { t: 'lp', v: '(', len: 1 };
     else if (c === ')' || c === ']') tok = { t: 'rp', v: ')', len: 1 };
-    else throw new MeasureError(`Story Stick doesn’t know “${c}”.`);
+    else throw new MeasureError(`Story Stick doesn’t know “${String.fromCodePoint(s.codePointAt(i))}”.`); // an emoji whole, not half
     tok.sp = sp;
     tok.at = i;
     out.push(tok);
