@@ -397,6 +397,23 @@ await page.keyboard.press('Enter');
 assert.deepEqual(await tapeLines(page), ['= 1′ 1″']);
 await odd.ctx.close();
 
+// ---------- Other tools' offline copies ----------
+// The other tools under junkdrawer.works/ keep their offline copies in the same caches as this one.
+// When its service worker takes over, it clears out an old copy of its own and leaves theirs alone.
+const shared = await device({ width: 1280, height: 800 }, false);
+page = shared.page;
+await page.goto(base + 'icon.svg'); // the same site, before the page has set up its service worker
+await page.evaluate(async () => {
+  await (await caches.open('another-tool-v1')).put('another-tool/index.html', new Response('theirs'));
+  await (await caches.open('story-stick-v0')).put('index.html', new Response('an old copy'));
+});
+await page.goto(base);
+await page.waitForFunction(() => navigator.serviceWorker?.controller); // it takes over the page after clearing out
+assert.equal(await page.evaluate(() => caches.has('another-tool-v1')), true, 'the offline copy of another tool is left alone');
+assert.equal(await page.evaluate(async () => (await caches.match('another-tool/index.html', { cacheName: 'another-tool-v1' }))?.text()), 'theirs', 'and what was in it');
+assert.equal(await page.evaluate(() => caches.has('story-stick-v0')), false, 'an old copy of this one is cleared out');
+await shared.ctx.close();
+
 assert.deepEqual(problems.filter(p => !p.startsWith('failed:')), [], 'problems while using it');
 await browser.close();
 server.close();
