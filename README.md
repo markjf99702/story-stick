@@ -2,7 +2,7 @@
 
 **Use it: [junkdrawer.works/story-stick](https://junkdrawer.works/story-stick/)**
 
-**A calculator that works in feet, inches and sixteenths.** Type `3' 7-5/16" + 11 3/8"` the way you'd write it and get `4′ 6-11/16″`, worked out exactly and read like a tape, with what the rounding left out. Around it are the shop sums that come up at the saw: evenly spaced balusters, a board split into equal parts, stairs, miters and crown, board feet, right triangles and square, and fractions to millimetres. It's the workshop partner to [Kerf](https://junkdrawer.works/kerf/).
+**A calculator that works in feet, inches and sixteenths.** Type `3' 7-5/16" + 11 3/8"` the way you'd write it and get `4′ 6-11/16″`, worked out exactly and read like a tape, with what the rounding left out. Around it are the shop sums that come up at the saw: evenly spaced balusters, a board split into equal parts, stairs, miters and crown, board feet, right triangles and square, and fractions to millimetres. It's the workshop partner to [Kerf](https://kerf.junkdrawer.works/).
 
 <p align="center">
   <img src="docs/phone-calc.png" alt="The calculator: a paper tape named Bookcase above a green LCD reading 1′ 6-7/8″ for 7′ 10-1/2″ ÷ 5, plus a hair of 0.025″, over a keypad with a yellow row of fraction keys and yellow feet, inches and mm keys" width="250">
