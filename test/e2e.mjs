@@ -204,6 +204,20 @@ assert.equal(await page.locator('#st-checks .check.no').count(), 1, 'a steep, sh
 assert.equal(await page.locator('.steps tbody tr').count(), 14);
 await page.fill('#st-run', "12' 6\"");
 assert.equal(await page.isDisabled('#st-tread'), true, 'a set run decides the tread');
+// With reduced motion on, the slide-up keypad brings a box into view without a smooth scroll.
+await page.emulateMedia({ reducedMotion: 'reduce' });
+await page.evaluate(() => {
+  const scrollBy = window.scrollBy.bind(window);
+  window.scrolled = [];
+  window.scrollBy = o => { window.scrolled.push(o); scrollBy(o); };
+  document.activeElement?.blur();
+  scrollTo(0, 0);
+  document.getElementById('st-thick').focus({ preventScroll: true });
+});
+await page.waitForFunction(() => window.scrolled.length > 0, null, { timeout: 5000 });
+assert.equal(await page.evaluate(() => window.scrolled[0].behavior), 'auto');
+await page.click('#dockDone');
+await page.emulateMedia({ reducedMotion: 'no-preference' });
 await fits(page, 'stairs');
 
 await tool('Miters');

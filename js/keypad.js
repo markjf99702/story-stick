@@ -107,7 +107,8 @@ export function initDock() {
     document.body.classList.add('docked');
     requestAnimationFrame(() => {
       const r = input.getBoundingClientRect(), top = dock.getBoundingClientRect().top;
-      if (r.bottom > top - 12 || r.top < 60) window.scrollBy({ top: r.top - Math.max(80, (top - r.height) / 2.4), behavior: 'smooth' });
+      const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      if (r.bottom > top - 12 || r.top < 60) window.scrollBy({ top: r.top - Math.max(80, (top - r.height) / 2.4), behavior });
     });
   });
   document.addEventListener('focusout', e => {
