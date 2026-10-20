@@ -363,6 +363,11 @@ for (const width of [360, 320]) {
     await narrow.page.waitForFunction(key => document.body.dataset.screen === key, s || 'calc');
     await narrow.page.evaluate(() => document.fonts.ready);
     await fits(narrow.page, `${s || 'the calculator'} at ${width}px`);
+    // Boxes side by side stay level when a label runs to two lines ("Inside length of a side" on Miters at 360px).
+    const uneven = await narrow.page.evaluate(() => [...document.querySelectorAll('.pair, .trio')]
+      .map(p => [...p.querySelectorAll(':scope > .field > input')].map(i => i.getBoundingClientRect().top))
+      .filter(tops => Math.max(...tops) - Math.min(...tops) > 0.5));
+    assert.deepEqual(uneven, [], `boxes side by side are level on ${s || 'the calculator'} at ${width}px`);
   }
   assert.equal(await narrow.page.getByRole('button', { name: 'Convert', exact: true }).count(), 1, `the tools button names the screen at ${width}px`);
   assert.equal(await narrow.page.locator('#toolsBtn .now').evaluate(e => e.getBoundingClientRect().width > 1), width >= 340, 'and shows the name only when there is room');

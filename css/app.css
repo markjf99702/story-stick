@@ -414,7 +414,7 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 .card > h2:first-child { margin-top: 0; }
 .card h2 { font-size: 23px; margin: 22px 0 10px; }
 .card h3 { font-size: 19px; margin: 0 0 4px; }
-.field { display: grid; gap: 5px; align-content: start; margin: 0 0 14px; min-width: 0; } /* boxes side by side stay level when the line under one wraps */
+.field { display: grid; gap: 5px; align-content: start; margin: 0 0 14px; min-width: 0; } /* level boxes side by side where subgrid (.pair) isn't supported */
 .field .label { font-weight: 600; font-size: 15px; color: var(--ink-2); }
 .field input {
   width: 100%; min-width: 0; height: 52px; padding: 0 13px;
@@ -430,6 +430,9 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 .reads.bad { color: var(--bad); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+/* Boxes side by side share rows for the label, the box and the line under it, so they stay level whichever runs to two lines. */
+.pair, .trio { grid-template-rows: auto auto auto; row-gap: 5px; }
+.pair > .field, .trio > .field { grid-row: span 3; grid-template-rows: subgrid; }
 .trio .field input { padding: 0 9px; font-size: 21px; }
 .hint { color: var(--muted); font-size: 15px; }
 .hint.small, p.small { font-size: 14px; }
