@@ -530,7 +530,8 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 .drawing.stairs { max-height: 340px; }
 .drawing.tri text.ang { fill: var(--red); }
 .frame-row { display: flex; align-items: center; gap: 18px; margin-bottom: 12px; }
-.frame-pic { width: 130px; flex: none; }
+.frame-pic { flex: 0 1 130px; min-width: 0; } /* gives way on a narrow phone, so the Sides stepper stays in the card */
+.frame-row > :last-child { flex: none; }
 .frame-pic .drawing { margin: 0; }
 .shape { margin: 6px 0 0; font: 600 20px var(--disp); color: var(--ink-2); }
 .settings-out { display: grid; gap: 10px; margin: 8px 0; }

@@ -322,6 +322,20 @@ for (const s of ['', 'spacing', 'divide', 'stairs', 'miters', 'board-feet', 'tri
 }
 assert.equal(await page.locator('#dock').count(), 0, 'no slide-up keypad with a mouse and keyboard');
 
+// ---------- On narrow phones ----------
+for (const width of [360, 320]) {
+  const narrow = await device({ width, height: 740 }, true);
+  await narrow.page.goto(base + '#/miters');
+  await narrow.page.locator('.tool-head').waitFor();
+  await narrow.page.evaluate(() => document.fonts.ready);
+  // The frame drawing gives way, so the Sides stepper's + stays inside the card.
+  assert.equal(await narrow.page.evaluate(() => {
+    const card = document.querySelector('.frame-row').closest('.card').getBoundingClientRect();
+    return document.querySelector('[data-stepper="mt-sides"]').getBoundingClientRect().right <= card.right - 16;
+  }), true, `the Sides stepper stays inside its card at ${width}px`);
+  await narrow.ctx.close();
+}
+
 // Clear everything takes the answer off the LCD too, so a sign after it has nothing to carry on from.
 await page.goto(base + '#/');
 await page.locator('.calc').waitFor();
