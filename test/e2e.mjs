@@ -271,6 +271,8 @@ for (const [count, why] of [['0', 'At least 1.'], ['-2', 'At least 1.'], ['abc',
 await page.fill('#bf-count', '2.5');
 assert.equal(await text(page, '#bf-count-reads'), 'Whole boards: counted as 3');
 assert.equal(await text(page, '#bf-out'), '24 bd ft');
+const top = id => page.evaluate(i => document.getElementById(i).getBoundingClientRect().top, id);
+assert.equal(await top('bf-price'), await top('bf-count'), 'the box beside it stays level when that line wraps');
 await page.fill('#bf-count', '3');
 assert.equal(await text(page, '#bf-count-reads'), '', 'a whole number says nothing');
 assert.equal(await page.isDisabled('#bf-add'), false);

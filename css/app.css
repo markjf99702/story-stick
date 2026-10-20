@@ -414,7 +414,7 @@ body[data-screen="calc"] main { padding: 0; max-width: none; }
 .card > h2:first-child { margin-top: 0; }
 .card h2 { font-size: 23px; margin: 22px 0 10px; }
 .card h3 { font-size: 19px; margin: 0 0 4px; }
-.field { display: grid; gap: 5px; margin: 0 0 14px; min-width: 0; }
+.field { display: grid; gap: 5px; align-content: start; margin: 0 0 14px; min-width: 0; } /* boxes side by side stay level when the line under one wraps */
 .field .label { font-weight: 600; font-size: 15px; color: var(--ink-2); }
 .field input {
   width: 100%; min-width: 0; height: 52px; padding: 0 13px;
