@@ -717,6 +717,114 @@ test('backspace and clear', () => {
   assert.deepEqual(sel, { text: '3′ ', caret: 3 });
 });
 
+// ---------- Two copies open at once ----------
+// A second tab, or the installed app and a tab, share one save. Each import of js/store.js with its own ?query is a
+// copy of the page with its own memory of the save; they share a stand-in for the browser's localStorage.
+let copiesOpened = 0;
+async function twoCopies(save) {
+  const box = new Map(save ? [['story-stick', JSON.stringify({ v: 1, settings: {}, tools: {}, lumber: [], ...save })]] : []);
+  const storage = { getItem: k => (box.has(k) ? box.get(k) : null), setItem: (k, v) => { box.set(k, String(v)); } };
+  Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true, writable: true });
+  const open = async () => (await import(`../js/store.js?copy=${++copiesOpened}`)).store;
+  return { a: await open(), b: await open(), saved: () => JSON.parse(box.get('story-stick')) };
+}
+const lengthOf = n => ({ q: Q(n), dim: 1 });
+const sums = t => t.lines.map(l => l.e);
+const tape = (id, name, ...lines) => ({ id, name, at: 1, lines: lines.map((e, i) => ({ e, v: { q: `${parseInt(e)}/1`, dim: 1 }, at: i + 1 })) });
+
+test('two copies open at once keep each other’s sums on the tape', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', 'Deck'), tapes: [] });
+  a.addLine('1"', lengthOf(1));
+  b.addLine('2"', lengthOf(2));
+  a.addLine('3"', lengthOf(3));
+  b.addLine('4"', lengthOf(4));
+  assert.deepEqual(sums(saved().tape), ['1"', '2"', '3"', '4"'], 'in the order they were worked out');
+  assert.deepEqual(sums(a.tape), ['1"', '2"', '3"'], 'a copy has the other’s sums once it saves');
+  assert.equal(saved().tape.name, 'Deck');
+});
+
+test('two copies open at once keep each other’s lumber, and what one takes off stays off', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', ''), tapes: [], lumber: [{ id: 'old', what: 'Pine' }] });
+  const what = () => saved().lumber.map(x => x.what);
+  a.addLumber({ what: 'Oak' });
+  b.addLumber({ what: 'Walnut' });
+  assert.deepEqual(what(), ['Pine', 'Oak', 'Walnut']);
+  a.removeLumber('old');
+  assert.deepEqual(what(), ['Oak', 'Walnut']);
+  b.addLumber({ what: 'Cherry' });
+  assert.deepEqual(what(), ['Oak', 'Walnut', 'Cherry'], 'Pine stays off');
+  // Clearing the list clears what that copy shows; Cherry, which it hadn't seen yet, stays.
+  a.clearLumber();
+  assert.deepEqual(what(), ['Cherry']);
+  b.addLumber({ what: 'Maple' });
+  assert.deepEqual(what(), ['Cherry', 'Maple'], 'and the rest stays cleared');
+});
+
+test('two copies open at once: new tapes, names and deleted tapes', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', '', '1"'), tapes: [tape('y', '', '2"')] });
+  b.newTape(); // the other copy starts a fresh tape while this one carries on with x
+  a.addLine('5"', lengthOf(5));
+  assert.equal(saved().tape.id, 'x');
+  assert.deepEqual(saved().tapes.map(t => t.id), ['y'], 'a blank tape just started in the other copy isn’t listed');
+  b.addLine('6"', lengthOf(6));
+  assert.deepEqual(sums(saved().tape), ['6"']);
+  assert.deepEqual(saved().tapes.map(t => [t.id, sums(t)]), [['x', ['1"', '5"']], ['y', ['2"']]], 'x has the sum added in the other copy');
+  a.nameTape('y', 'Shelves');
+  assert.deepEqual(saved().tapes.map(t => [t.id, t.name]), [[b.tape.id, ''], ['y', 'Shelves']], 'the other copy’s tape is listed here');
+  b.deleteTape('y');
+  assert.deepEqual(saved().tapes.map(t => t.id), ['x']);
+  a.addLine('7"', lengthOf(7));
+  assert.deepEqual(saved().tapes.map(t => t.id), [b.tape.id], 'a deleted tape stays deleted');
+  assert.deepEqual(sums(saved().tape), ['1"', '5"', '7"']);
+});
+
+test('two copies open at once: a tape one copy still has as blank keeps the other’s sums', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', ''), tapes: [tape('y', '', '1"')] });
+  a.addLine('2"', lengthOf(2));
+  b.openTape('y'); // x is still blank here, so opening y leaves it off the list, as it does any blank tape
+  assert.equal(saved().tape.id, 'y');
+  assert.deepEqual(saved().tapes.map(t => [t.id, sums(t)]), [['x', ['2"']]]);
+});
+
+test('two copies open at once: settings and what was typed in each tool', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', ''), tapes: [] });
+  a.setting('den', 32);
+  b.setting('show', 'mm');
+  assert.deepEqual(saved().settings, { den: 32, show: 'mm', money: '$' });
+  assert.equal(b.settings.den, 32, 'the copy that saved last has the other’s setting too');
+  a.saveTool('spacing', { space: '8′' });
+  b.saveTool('stairs', { rise: '9′' });
+  a.tool('convert'); // a screen reading what was last typed in it
+  b.saveTool('convert', { v: '18mm' });
+  a.setting('money', '£');
+  assert.deepEqual(saved().tools, { spacing: { space: '8′' }, stairs: { rise: '9′' }, convert: { v: '18mm' } });
+  assert.equal(saved().settings.money, '£');
+});
+
+test('two copies open at once: the tape on a calculator stays whole, and Clear everything clears the rest', async () => {
+  const { a, b, saved } = await twoCopies({ tape: tape('x', '', '1"', '2"'), tapes: [tape('y', '', '3"')], lumber: [{ id: 'l', what: 'Oak' }] });
+  b.deleteTape('x'); // Clear, on the other copy's calculator
+  a.addLine('9"', lengthOf(9));
+  assert.deepEqual(sums(saved().tape), ['1"', '2"', '9"'], 'the tape this copy shows is kept whole');
+  b.clearAll();
+  assert.deepEqual([saved().tapes, saved().lumber], [[], []], 'everything, including what the other copy added');
+  a.addLine('10"', lengthOf(10));
+  assert.deepEqual(sums(saved().tape), ['1"', '2"', '9"', '10"']);
+  assert.deepEqual([saved().tapes, saved().lumber], [[], []], 'the rest stays cleared');
+});
+
+test('one copy on its own saves exactly what it has', async () => {
+  const { a, saved } = await twoCopies({ tape: tape('x', '', '1"'), tapes: [tape('y', '', '2"')], lumber: [{ id: 'l', what: 'Oak' }] });
+  a.removeLumber('l');
+  a.deleteTape('y');
+  a.addLine('3"', lengthOf(3));
+  assert.deepEqual([saved().lumber, saved().tapes, sums(saved().tape)], [[], [], ['1"', '3"']]);
+  // A save it can't read (a later version's, say) is written over, as before.
+  localStorage.setItem('story-stick', '{"v":2}');
+  a.addLine('4"', lengthOf(4));
+  assert.deepEqual(sums(saved().tape), ['1"', '3"', '4"']);
+});
+
 // ---------- The offline copy ----------
 
 test('the service worker keeps a copy of every file the page uses', async () => {

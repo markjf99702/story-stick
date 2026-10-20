@@ -461,6 +461,40 @@ await page.keyboard.press('Enter');
 assert.deepEqual(await tapeLines(page), ['= 1′ 1″']);
 await odd.ctx.close();
 
+// ---------- Two copies open at once ----------
+// Two tabs, or the installed app and a tab: each saves what the other saved too, instead of writing over it.
+const two = await device({ width: 1280, height: 800 }, false);
+const tabs = [two.page, await two.ctx.newPage()];
+tabs[1].on('pageerror', e => problems.push(e.message));
+tabs[1].on('console', m => { if (m.type() === 'error') problems.push(m.text()); });
+const sum = async (tab, s) => { await tab.keyboard.type(s); await tab.keyboard.press('Enter'); };
+await tabs[0].goto(base);
+await sum(tabs[0], '1"');
+await tabs[1].goto(base); // the second copy opens on the same tape
+assert.deepEqual(await tapeLines(tabs[1]), ['= 1″']);
+await sum(tabs[1], '2"');
+await sum(tabs[0], '3"');
+assert.deepEqual(await tapeLines(tabs[0]), ['= 1″', '= 2″', '= 3″'], 'the other tab’s sum joins the tape');
+await sum(tabs[1], '4"');
+// Drawn again with the other tab's sum after it, the answer on show keeps its own sum.
+await tabs[0].click('#settingsBtn');
+await tabs[0].click('[data-seg=den] [data-v="32"]');
+await tabs[0].click('.sheet .close');
+assert.deepEqual(await tapeLines(tabs[0]), ['= 1″', '= 2″', '= 3″', '= 4″']);
+assert.equal(await tabs[0].inputValue('#expr'), '3"');
+assert.equal(await text(tabs[0], '#read'), '3″');
+for (const [tab, what] of [[tabs[0], 'Oak'], [tabs[1], 'Walnut']]) {
+  await tab.goto(base + '#/board-feet');
+  await tab.fill('#bf-what', what);
+  await tab.click('#bf-add');
+}
+assert.deepEqual(await tabs[1].locator('.lumber .what b').allInnerTexts(), ['Oak', 'Walnut']);
+await tabs[0].reload();
+await tabs[0].locator('.lumber li').nth(1).waitFor();
+assert.deepEqual(await tabs[0].locator('.lumber .what b').allInnerTexts(), ['Oak', 'Walnut'], 'the lumber list from both');
+assert.equal(await tabs[0].evaluate(() => JSON.parse(localStorage.getItem('story-stick')).tape.lines.length), 4);
+await two.ctx.close();
+
 // ---------- Other tools' offline copies ----------
 // The other tools under junkdrawer.works/ keep their offline copies in the same caches as this one.
 // When its service worker takes over, it clears out an old copy of its own and leaves theirs alone.
