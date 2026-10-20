@@ -323,12 +323,20 @@ for (const s of ['', 'spacing', 'divide', 'stairs', 'miters', 'board-feet', 'tri
 assert.equal(await page.locator('#dock').count(), 0, 'no slide-up keypad with a mouse and keyboard');
 
 // ---------- On narrow phones ----------
+// The header tightens up under 380px, and under 340px the tools button is just ≡, still named for screen readers.
 for (const width of [360, 320]) {
   const narrow = await device({ width, height: 740 }, true);
-  await narrow.page.goto(base + '#/miters');
-  await narrow.page.locator('.tool-head').waitFor();
-  await narrow.page.evaluate(() => document.fonts.ready);
+  for (const s of ['', 'spacing', 'divide', 'stairs', 'miters', 'board-feet', 'triangle', 'convert']) {
+    await narrow.page.goto(base + '#/' + s);
+    await narrow.page.waitForFunction(key => document.body.dataset.screen === key, s || 'calc');
+    await narrow.page.evaluate(() => document.fonts.ready);
+    await fits(narrow.page, `${s || 'the calculator'} at ${width}px`);
+  }
+  assert.equal(await narrow.page.getByRole('button', { name: 'Convert', exact: true }).count(), 1, `the tools button names the screen at ${width}px`);
+  assert.equal(await narrow.page.locator('#toolsBtn .now').evaluate(e => e.getBoundingClientRect().width > 1), width >= 340, 'and shows the name only when there is room');
   // The frame drawing gives way, so the Sides stepper's + stays inside the card.
+  await narrow.page.goto(base + '#/miters');
+  await narrow.page.waitForFunction(() => document.body.dataset.screen === 'miters');
   assert.equal(await narrow.page.evaluate(() => {
     const card = document.querySelector('.frame-row').closest('.card').getBoundingClientRect();
     return document.querySelector('[data-stepper="mt-sides"]').getBoundingClientRect().right <= card.right - 16;

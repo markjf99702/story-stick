@@ -193,6 +193,15 @@ small { font-size: .8em; }
   .nav { display: flex; }
   .bar-btn.tools { display: none; }
 }
+/* Narrow phones: a tighter header, and below 340px the tools button shows only ≡ (screen readers still hear the screen's name). */
+@media (max-width: 380px) {
+  .bar { gap: 8px; padding-inline: max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right)); }
+  .brand span { font-size: 21px; }
+}
+@media (max-width: 339px) {
+  .bar-btn.tools { width: 44px; padding: 0; justify-content: center; }
+  .bar-btn.tools .now { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
 
 /* The strip of tape blade under the header */
 .blade {
