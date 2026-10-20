@@ -344,6 +344,18 @@ for (const width of [360, 320]) {
   await narrow.ctx.close();
 }
 
+// ---------- The keyboard focus ring ----------
+// Ink in light mode, where tape yellow would be lost on the yellow keys and the page; tape yellow in dark mode.
+for (const [scheme, colour] of [['light', 'rgb(28, 29, 31)'], ['dark', 'rgb(195, 153, 0)']]) {
+  const ring = await device({ width: 1280, height: 800 }, false);
+  await ring.page.emulateMedia({ colorScheme: scheme });
+  await ring.page.goto(base);
+  await ring.page.locator('.calc').waitFor();
+  await ring.page.keyboard.press('Tab'); // from the sum box to the first key
+  assert.equal(await ring.page.evaluate(() => document.activeElement.matches('.k:focus-visible') && getComputedStyle(document.activeElement).outlineColor), colour, `the focus ring in ${scheme} mode`);
+  await ring.ctx.close();
+}
+
 // Clear everything takes the answer off the LCD too, so a sign after it has nothing to carry on from.
 await page.goto(base + '#/');
 await page.locator('.calc').waitFor();
