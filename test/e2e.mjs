@@ -180,6 +180,23 @@ assert.equal(await text(page, '#sp-n'), '14');
 assert.match(await text(page, '#sp-note'), /fewest .* is 13/);
 await page.click('[data-seg=at] [data-v=center]');
 assert.equal(await text(page, '#sp-mh'), 'Centres from the left end');
+// After the Balusters preset, a gap of 4″ or more says a 4″ ball would pass, even within the largest gap given.
+const BALL = 'A 4″ ball would pass: railings need less than 4″.';
+await page.fill('#sp-gap', '4-1/4');
+assert.equal(await text(page, '#sp-gapv'), '4-1⁄8″');
+assert.equal(await text(page, '#sp-note'), `12 with 13 gaps. ${BALL}`);
+assert.match(await page.getAttribute('#sp-note', 'class'), /bad/);
+await page.fill('#sp-gap', '3-7/8');
+assert.doesNotMatch(await text(page, '#sp-note'), /ball/, 'not when the gap is under 4″');
+await page.fill('#sp-gap', '4-1/4');
+await page.reload();
+await page.locator('#sp-note').waitFor();
+assert.equal(await text(page, '#sp-note'), `12 with 13 gaps. ${BALL}`, 'it remembers Balusters was chosen');
+// Pickets, fence boards and shelf pins have no such rule.
+await page.click('[data-p=pickets]');
+await page.fill('#sp-gap', '4-1/4');
+assert.equal(await text(page, '#sp-note'), '9 with 10 gaps.');
+assert.doesNotMatch(await page.getAttribute('#sp-note', 'class'), /bad/);
 await fits(page, 'even spacing');
 
 await tool('Divide a board');

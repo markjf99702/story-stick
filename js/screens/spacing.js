@@ -1,5 +1,6 @@
 // Even spacing: balusters, pickets, fence boards, shelf-pin holes.
 import { spacing } from '../tools.js';
+import { Q, cmp } from '../rational.js';
 import { store } from '../store.js';
 import { $, esc, fmt, lenField, readLen, seg, onSeg, stepper, marksList } from '../ui.js';
 import { spacingSVG } from '../draw.js';
@@ -11,6 +12,9 @@ const PRESETS = {
   boards: { width: '5-1/2″', gap: '1/4″', ends: 'items', at: 'left' },
   pins: { width: '1/4″', gap: '1-3/4″', ends: 'items', at: 'center' },
 };
+// Railings need gaps a 4″ ball can't pass through. Pickets, fence boards and shelf pins have no such rule,
+// so the page only says so when Balusters is the last preset chosen.
+const BALL = Q(4);
 
 export default {
   id: 'spacing',
@@ -18,7 +22,7 @@ export default {
   nav: 'Spacing',
   line: 'Balusters, pickets, boards, shelf pins: how many, the gap, and the marks.',
   render(main) {
-    const s = { space: '6′', width: '1-1/2″', gap: '3-7/8″', ends: 'gaps', at: 'left', count: null, ...store.tool('spacing') };
+    const s = { space: '6′', width: '1-1/2″', gap: '3-7/8″', ends: 'gaps', at: 'left', count: null, preset: '', ...store.tool('spacing') };
     main.innerHTML = `
       <div class="tool">
         <header class="tool-head">
@@ -80,8 +84,10 @@ export default {
       const bits = [`${r.n} with ${r.gaps} ${r.gaps === 1 ? 'gap' : 'gaps'}.`];
       if (s.count != null && r.fewest != null && s.count !== r.fewest) bits.push(`The fewest that keeps gaps at ${fmt.rd(gap)} or less is ${r.fewest}. <button type="button" class="link-btn" id="sp-fewest">Use ${r.fewest}</button>`);
       if (r.over) bits.push(`<b>The gaps are bigger than ${fmt.rd(gap)}.</b>`);
+      const ball = s.preset === 'balusters' && cmp(r.gap, BALL) >= 0;
+      if (ball) bits.push('<b>A 4″ ball would pass: railings need less than 4″.</b>');
       note.innerHTML = bits.join(' ');
-      note.className = 'note' + (r.over ? ' bad' : '');
+      note.className = 'note' + (r.over || ball ? ' bad' : '');
       $('#sp-draw').innerHTML = spacingSVG({ space, width, marks: r.marks, ends: s.ends });
       $('#sp-mh').textContent = s.at === 'center' ? 'Centres from the left end' : 'Left edges from the left end';
       $('#sp-marks').innerHTML = marksList(r.marks.map(m => fmt.html(s.at === 'center' ? m.center : m.left)));
@@ -91,10 +97,10 @@ export default {
     onSeg(main, 'ends', v => { s.ends = v; update(false); });
     onSeg(main, 'at', v => { s.at = v; update(); });
     main.querySelector('.presets').addEventListener('click', e => {
-      const p = PRESETS[e.target.closest('[data-p]')?.dataset.p];
+      const preset = e.target.closest('[data-p]')?.dataset.p, p = PRESETS[preset];
       if (!p) return;
       $('#sp-width').value = p.width; $('#sp-gap').value = p.gap;
-      Object.assign(s, { ends: p.ends, at: p.at });
+      Object.assign(s, { ends: p.ends, at: p.at, preset });
       main.querySelectorAll('[data-seg=ends] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === p.ends)));
       main.querySelectorAll('[data-seg=at] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === p.at)));
       update(false);
