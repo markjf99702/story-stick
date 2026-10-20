@@ -85,12 +85,14 @@ export const decInText = (x, places = 4) => `${dec(x, places)}″`;
 export const decFtText = (x, places = 4) => `${dec(num(x) / 12, places)} ft`;
 
 // What rounding left out, when it left anything: { more: true, text: '0.012″', mm: '0.30 mm' } or null.
+// One too small to show at 4 places reads 'under 0.0001″', so an answer that isn't exact never looks exact.
+// (A square root's or an angle's own float error is already nothing here: ticks() drops it.)
 export function hair(x, den) {
   const { rem } = ticks(x, den);
-  if (Math.abs(rem) < 1e-9) return null;
+  if (!rem) return null;
   const a = Math.abs(rem);
-  const places = a >= 0.001 ? 3 : 4;
-  return { more: rem > 0, text: `${a.toFixed(places)}″`, mm: `${(a * 25.4).toFixed(2)} mm` };
+  const shown = a.toFixed(a >= 0.001 ? 3 : 4);
+  return { more: rem > 0, text: Number(shown) ? `${shown}″` : 'under 0.0001″', mm: `${(a * 25.4).toFixed(2)} mm` };
 }
 export function hairText(x, den) {
   const h = hair(x, den);

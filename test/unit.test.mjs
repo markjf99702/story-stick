@@ -294,6 +294,13 @@ test('what rounding leaves out: a hair over or under', () => {
   assert.equal(F.hairText(Q(5500, 127), 64), '− a hair: 0.005″');
   assert.equal(F.hairText(Q(5500, 127), 32), '− a hair: 0.005″');
   assert.equal(F.hairText(Q(5500, 127), 8), '+ a hair: 0.057″', 'at 1/8 it rounds down to 43 1/4');
+  // Too small to show at 4 places, it still shows with its sign, so the answer doesn't look exact.
+  assert.equal(F.hairText(R.add(inch(1), Q(1, 100000)), 16), '+ a hair: under 0.0001″');
+  assert.equal(F.hairText(R.sub(inch(1), Q(1, 100000)), 16), '− a hair: under 0.0001″');
+  assert.equal(F.hairText(R.neg(R.add(inch(1), Q(1, 100000))), 16), '− a hair: under 0.0001″', 'a negative length a hair longer than −1″');
+  assert.equal(F.hairText(R.add(inch(1), Q(1n, 10n ** 12n)), 16), '+ a hair: under 0.0001″', 'however small');
+  assert.equal(F.hairText(R.add(inch(1), Q(5, 100000)), 16), '+ a hair: 0.0001″', '0.00005″ shows as 0.0001″');
+  assert.equal(F.hair(Math.SQRT2 ** 2, 16), null, 'a square root’s own float error is not a hair');
 });
 
 test('decimals, millimetres and plain numbers', () => {
