@@ -452,12 +452,14 @@ page = shared.page;
 await page.goto(base + 'icon.svg'); // the same site, before the page has set up its service worker
 await page.evaluate(async () => {
   await (await caches.open('another-tool-v1')).put('another-tool/index.html', new Response('theirs'));
+  await (await caches.open('story-stick-x-v1')).put('story-stick-x/index.html', new Response('a tool whose name starts the same'));
   await (await caches.open('story-stick-v0')).put('index.html', new Response('an old copy'));
 });
 await page.goto(base);
 await page.waitForFunction(() => navigator.serviceWorker?.controller); // it takes over the page after clearing out
 assert.equal(await page.evaluate(() => caches.has('another-tool-v1')), true, 'the offline copy of another tool is left alone');
 assert.equal(await page.evaluate(async () => (await caches.match('another-tool/index.html', { cacheName: 'another-tool-v1' }))?.text()), 'theirs', 'and what was in it');
+assert.equal(await page.evaluate(() => caches.has('story-stick-x-v1')), true, 'and one whose name starts with this one’s');
 assert.equal(await page.evaluate(() => caches.has('story-stick-v0')), false, 'an old copy of this one is cleared out');
 await shared.ctx.close();
 

@@ -19,10 +19,11 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
-// The other tools under junkdrawer.works/ keep their offline copies in the same caches, so clear out only this one's old copies.
+// The other tools under junkdrawer.works/ keep their offline copies in the same caches, so clear out only this one's
+// old copies, by their exact names: another tool's name could start with story-stick- too.
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k.startsWith('story-stick-') && k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE && /^story-stick-v[0-9]+$/.test(k)).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
