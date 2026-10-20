@@ -1,6 +1,6 @@
 // Board feet: work out board feet and cost, and keep a list for the lumber yard.
 import { boardFeet } from '../tools.js';
-import { Q, add, mul, toNumber, fromText, toText } from '../rational.js';
+import { Q, add, mul, round, isInt, fromText, toText } from '../rational.js';
 import { parseLength, tryNumber } from '../measure.js';
 import { store } from '../store.js';
 import { $, esc, fmt, lenField, numField, readLen, readNum, toast, copyText, ICON } from '../ui.js';
@@ -74,16 +74,26 @@ export default {
         </div>
       </div>`;
 
+    // How many boards: an empty box is one, and a fraction is rounded to whole boards and says so under the box.
+    // Under 1, or not a number at all, gives null, so the result goes blank and says why under the box.
+    const countOf = () => {
+      const n = readNum('bf-count'); // a number that doesn't read says why under the box
+      if (!n) return $('#bf-count').value.trim() ? null : 1;
+      const whole = Number(round(n)), reads = $('#bf-count-reads');
+      if (whole < 1) { reads.textContent = 'At least 1.'; reads.classList.add('bad'); return null; }
+      if (!isInt(n)) reads.textContent = `Whole boards: counted as ${whole}`;
+      return whole;
+    };
+
     let current = null;
     const update = () => {
       for (const k of ['thick', 'width', 'length', 'count', 'price', 'what']) s[k] = $(`#bf-${k}`).value;
       store.saveTool('board-feet', s);
       $('#bf-thick').dataset.bare = IN_QUARTERS.test(s.thick) ? 'in' : '';
       const t = readLen('bf-thick'), w = readLen('bf-width'), l = readLen('bf-length');
-      const n = readNum('bf-count'), price = priceOf($('#bf-price').value);
-      const count = n ? Math.max(1, Math.round(toNumber(n))) : 1;
+      const count = countOf(), price = priceOf($('#bf-price').value);
       current = null;
-      if (t && w && l) {
+      if (t && w && l && count) {
         const feet = boardFeet({ thick: t, width: w, length: l, count });
         current = { feet, price, count, t, w, l };
         $('#bf-out').innerHTML = `${bf(feet)} <small>bd ft</small>`;

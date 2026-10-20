@@ -244,6 +244,19 @@ await page.click('#bf-add');
 assert.equal(await page.locator('.lumber li').count(), 2);
 assert.match(await text(page, '.total'), /32 bd ft \$320.00/);
 await fits(page, 'board feet');
+// How many is whole boards, at least one: none, fewer or a typo blanks the result and says why.
+for (const [count, why] of [['0', 'At least 1.'], ['-2', 'At least 1.'], ['abc', 'Story Stick doesn’t know “a”.']]) {
+  await page.fill('#bf-count', count);
+  assert.equal(await text(page, '#bf-count-reads'), why);
+  assert.equal(await text(page, '#bf-out'), '–', `no board feet for ${count} boards`);
+  assert.equal(await page.isDisabled('#bf-add'), true, `and nothing to add for ${count} boards`);
+}
+await page.fill('#bf-count', '2.5');
+assert.equal(await text(page, '#bf-count-reads'), 'Whole boards: counted as 3');
+assert.equal(await text(page, '#bf-out'), '24 bd ft');
+await page.fill('#bf-count', '3');
+assert.equal(await text(page, '#bf-count-reads'), '', 'a whole number says nothing');
+assert.equal(await page.isDisabled('#bf-add'), false);
 
 await tool('Triangles and square');
 await page.fill('#tr-rise', '6');
